@@ -1,0 +1,25 @@
+
+Patient:
+  ADT:
+     - A28
+     - A31
+
+Encounter:
+  patient-referral: update
+
+
+DiagnosticReport:
+  patient-referral: update
+  ORU:
+    - R01
+
+Observation:
+  patient-referral: update
+  ORU:
+    - R01
+
+ServiceRequest:
+  patient-referral: update
+
+QuestionnaireResponse:
+  patient-referral: update
