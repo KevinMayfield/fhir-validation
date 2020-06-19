@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
+import uk.mayfieldis.hapifhir.IGValidationSupport;
 import uk.mayfieldis.hapifhir.PackageManager;
 import uk.mayfieldis.hapifhir.TerminologyServerValidationSupport;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
@@ -128,12 +129,17 @@ public class ValidationServer extends SpringBootServletInitializer {
         }
 
         List<NpmPackage> npmPackageList = new ArrayList<>();
-        if (validationIgPackage !=null) {
-            npmPackageList.add(validationIgPackage);
-        }
+
         if (serverIgPackage !=null) {
-            npmPackageList.add(serverIgPackage);
+            //npmPackageList.add(serverIgPackage);
+            validationSupportChain.addValidationSupport(new IGValidationSupport(r4ctx, serverIgPackage));
         }
+
+        if (validationIgPackage !=null) {
+            //npmPackageList.add(validationIgPackage);
+            validationSupportChain.addValidationSupport(new IGValidationSupport(r4ctx, validationIgPackage));
+        }
+
         validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
 
         DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(r4ctx);

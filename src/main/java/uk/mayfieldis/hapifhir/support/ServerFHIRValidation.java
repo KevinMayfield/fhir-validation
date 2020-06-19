@@ -126,6 +126,11 @@ public class ServerFHIRValidation {
         if (validationOptions == null || validationOptions.getProfiles().size() == 0) {
             // Force validation to use minimum acceptable profile
             setProfile(resource);
+        } else {
+            // Expected validationOptions to take care of this but resorting to old fashioned profile selection
+            for (String profile : validationOptions.getProfiles()) {
+                resource.getMeta().addProfile(profile);
+            }
         }
 
         return validator.validateWithResult(resource, validationOptions);

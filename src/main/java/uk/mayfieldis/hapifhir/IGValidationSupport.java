@@ -26,6 +26,8 @@ public class IGValidationSupport implements IValidationSupport
     private Map<String, ValueSet> myValueSets;
     FhirContext ctx;
 
+
+
     NpmPackage npm = null;
 
     public IGValidationSupport(FhirContext ctx, NpmPackage _npm) throws Exception {
@@ -40,17 +42,17 @@ public class IGValidationSupport implements IValidationSupport
         for (String resource : npm.listResources( "StructureDefinition")) {
 
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.debug("Loading: {}",structureDefinition.getUrl());
+            LOG.info("Loading: {}",structureDefinition.getUrl());
             this.myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }
         for (String resource : npm.listResources("ValueSet")) {
             ValueSet valueSet = (ValueSet) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.debug("Loading: {}", valueSet.getUrl());
+            LOG.info("Loading: {}", valueSet.getUrl());
             this.myValueSets.put(valueSet.getUrl(), valueSet);
         }
         for (String resource : npm.listResources("CodeSystem")) {
             CodeSystem codeSys = (CodeSystem) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.debug("Loading: {}", codeSys.getUrl());
+            LOG.info("Loading: {}", codeSys.getUrl());
             this.myCodeSystems.put(codeSys.getUrl(), codeSys);
         }
 
@@ -70,6 +72,7 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public CodeSystem fetchCodeSystem(String theSystem) {
+        LOG.info("fetchCodeSystem {}",theSystem);
         return (CodeSystem)this.fetchCodeSystemOrValueSet(theSystem, true);
     }
 
@@ -77,15 +80,21 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public ValueSet fetchValueSet(String uri) {
+        LOG.info("fetchValueSet {}",uri);
         return (ValueSet)this.fetchCodeSystemOrValueSet( uri, false);
     }
 
     @Override
     public StructureDefinition fetchStructureDefinition(String url) {
+        LOG.info("fetchStructureDefinition {}",url);
         return (StructureDefinition)this.myStructureDefinitions.get(url);
     }
 
-
+    @Override
+    public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+        LOG.info("isCodeSystemSupported {}",theSystem);
+        return false;
+    }
 
     @Override
     public List<IBaseResource> fetchAllConformanceResources() {
