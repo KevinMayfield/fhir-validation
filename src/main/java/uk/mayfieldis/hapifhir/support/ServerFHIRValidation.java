@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.*;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.utilities.cache.NpmPackage;
@@ -128,6 +129,7 @@ public class ServerFHIRValidation {
             setProfile(resource);
         } else {
             // Expected validationOptions to take care of this but resorting to old fashioned profile selection
+            resource.getMeta().getProfile().clear();
             for (String profile : validationOptions.getProfiles()) {
                 resource.getMeta().addProfile(profile);
             }

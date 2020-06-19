@@ -67,12 +67,13 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public List<StructureDefinition> fetchAllStructureDefinitions() {
+        LOG.debug("fetchAllStructureDefinitions ALL");
         return new ArrayList<>(this.myStructureDefinitions.values());
     }
 
     @Override
     public CodeSystem fetchCodeSystem(String theSystem) {
-        LOG.info("fetchCodeSystem {}",theSystem);
+        LOG.debug("fetchCodeSystem {}",theSystem);
         return (CodeSystem)this.fetchCodeSystemOrValueSet(theSystem, true);
     }
 
@@ -80,24 +81,30 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public ValueSet fetchValueSet(String uri) {
-        LOG.info("fetchValueSet {}",uri);
+        LOG.debug("fetchValueSet {}",uri);
         return (ValueSet)this.fetchCodeSystemOrValueSet( uri, false);
     }
 
     @Override
     public StructureDefinition fetchStructureDefinition(String url) {
-        LOG.info("fetchStructureDefinition {}",url);
-        return (StructureDefinition)this.myStructureDefinitions.get(url);
+        StructureDefinition structureDefinition = (StructureDefinition)this.myStructureDefinitions.get(url);
+        if (structureDefinition !=null) {
+            LOG.debug("fetchStructureDefinition {} Found {}", url, npm.getPath());
+        } else {
+            LOG.debug("fetchStructureDefinition {} Not Present {}", url, npm.getPath());
+        }
+        return structureDefinition;
     }
 
     @Override
     public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
-        LOG.info("isCodeSystemSupported {}",theSystem);
+        LOG.debug("isCodeSystemSupported {}",theSystem);
         return false;
     }
 
     @Override
     public List<IBaseResource> fetchAllConformanceResources() {
+        LOG.debug("fetchAllConformanceResources");
         ArrayList<IBaseResource> retVal = new ArrayList();
         retVal.addAll(this.myCodeSystems.values());
         retVal.addAll(this.myStructureDefinitions.values());
@@ -105,8 +112,10 @@ public class IGValidationSupport implements IValidationSupport
         return retVal;
     }
 
+
     @Override
     public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+        LOG.debug("fetchResource {} {} ",theUri, theClass.getSimpleName());
         Validate.notBlank(theUri, "theUri must not be null or blank", new Object[0]);
         if (theClass.equals(StructureDefinition.class)) {
             return (T) this.fetchStructureDefinition( theUri);
@@ -114,9 +123,12 @@ public class IGValidationSupport implements IValidationSupport
             return !theClass.equals(ValueSet.class) && !theUri.startsWith("http://hl7.org/fhir/ValueSet/") ? null : (T) this.fetchValueSet(theUri);
         }
     }
-
-
-
+    /*
+      @Override
+      public IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+          super();
+      }
+  */
     private DomainResource fetchCodeSystemOrValueSet(String theSystem, boolean codeSystem) {
         synchronized(this) {
             return codeSystem ? (DomainResource)((Map)this.myCodeSystems).get(theSystem) : (DomainResource)((Map)this.myValueSets).get(theSystem);

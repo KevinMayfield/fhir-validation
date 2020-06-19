@@ -18,7 +18,7 @@
       <spring-boot-version>2.2.7.RELEASE</spring-boot-version>
       <spring_security_version>1.0.10.RELEASE</spring_security_version>
 
-      <hapi-fhir-version>5.0.1</hapi-fhir-version>
+      <hapi-fhir-version>5.0.2</hapi-fhir-version>
       
       <slf4j>1.7.25</slf4j>
       <phloc_commons_version>4.4.11</phloc_commons_version>
