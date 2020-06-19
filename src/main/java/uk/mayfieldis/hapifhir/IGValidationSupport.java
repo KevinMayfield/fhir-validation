@@ -42,7 +42,7 @@ public class IGValidationSupport implements IValidationSupport
         for (String resource : npm.listResources( "StructureDefinition")) {
 
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.info("Loading: {}",structureDefinition.getUrl());
+            LOG.info("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
             this.myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }
         for (String resource : npm.listResources("ValueSet")) {
