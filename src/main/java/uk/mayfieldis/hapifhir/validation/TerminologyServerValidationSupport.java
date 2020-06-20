@@ -1,4 +1,4 @@
-package uk.mayfieldis.hapifhir;
+package uk.mayfieldis.hapifhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
+import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,6 +17,8 @@ import java.rmi.ServerException;
 import java.util.*;
 
 public class TerminologyServerValidationSupport implements IValidationSupport {
+
+    // Potentially obsolete but may need it as a STU3 conversion step 20/June/2020 KGM
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TerminologyServerValidationSupport.class);
 

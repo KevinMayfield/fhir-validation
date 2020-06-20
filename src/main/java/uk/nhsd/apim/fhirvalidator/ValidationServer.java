@@ -6,10 +6,11 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,9 +27,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
-import uk.mayfieldis.hapifhir.IGValidationSupport;
+import uk.mayfieldis.hapifhir.validation.IGValidationSupport;
 import uk.mayfieldis.hapifhir.PackageManager;
-import uk.mayfieldis.hapifhir.TerminologyServerValidationSupport;
+import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 import uk.nhsd.apim.fhirvalidator.FHIRServer.FHIRRestfulServer;
 
@@ -123,11 +124,12 @@ public class ValidationServer extends SpringBootServletInitializer {
 
         ValidationSupportChain
                 validationSupportChain = new ValidationSupportChain();
-        // Ideally Terminology Server needs to run first to provide code validation
-        if (FHIRServerProperties.getValidateTerminologyEnabled() && !FHIRServerProperties.getTerminologyServer().isEmpty()) {
-            validationSupportChain.addValidationSupport(new TerminologyServerValidationSupport(r4ctx,FHIRServerProperties.getTerminologyServer()));
-        }
 
+        DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(r4ctx);
+        validationSupportChain.addValidationSupport(defaultProfileValidationSupport);
+
+
+        // IGValidation support acts simlilar to PrePopulatedValidationSupport
         List<NpmPackage> npmPackageList = new ArrayList<>();
 
         if (serverIgPackage !=null) {
@@ -140,10 +142,24 @@ public class ValidationServer extends SpringBootServletInitializer {
             validationSupportChain.addValidationSupport(new IGValidationSupport(r4ctx, validationIgPackage));
         }
 
-        validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
 
-        DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(r4ctx);
-        validationSupportChain.addValidationSupport(defaultProfileValidationSupport);
+        if (!FHIRServerProperties.getValidateTerminologyEnabled()) {
+           validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
+        } else {
+            // Try InMemory first??
+
+            validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
+
+
+            // Use ontoserver
+            // Create a module that uses a remote terminology service
+
+            RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
+            remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
+            validationSupportChain.addValidationSupport(remoteTermSvc);
+        }
+// Wrap the chain in a cache to improve performance
+        CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
 
         // We try the above validators first
 

@@ -1,7 +1,8 @@
-package uk.mayfieldis.hapifhir;
+package uk.mayfieldis.hapifhir.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -10,6 +11,8 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +46,9 @@ public class IGValidationSupport implements IValidationSupport
 
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
             LOG.info("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
+            if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                LOG.error("Missing Snapshot {}", structureDefinition.getUrl());
+            }
             this.myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }
         for (String resource : npm.listResources("ValueSet")) {
@@ -63,7 +69,11 @@ public class IGValidationSupport implements IValidationSupport
         return this.ctx;
     }
 
-
+    @Override
+    public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+        LOG.error("expandValueSet");
+        return null;
+    }
 
     @Override
     public List<StructureDefinition> fetchAllStructureDefinitions() {
