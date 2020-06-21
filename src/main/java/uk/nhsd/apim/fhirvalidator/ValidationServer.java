@@ -13,6 +13,10 @@ import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -131,18 +135,21 @@ public class ValidationServer extends SpringBootServletInitializer {
         // IGValidation support acts simlilar to PrePopulatedValidationSupport
         List<NpmPackage> npmPackageList = new ArrayList<>();
 
+
+        IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
+
         if (serverIgPackage !=null) {
             //npmPackageList.add(serverIgPackage);
             IGValidationSupport igValidationSupport = new IGValidationSupport(r4ctx, serverIgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(validationSupportChain);
+            igValidationSupport.createSnapshots(context, validationSupportChain);
         }
 
         if (validationIgPackage !=null) {
             //npmPackageList.add(validationIgPackage);
             IGValidationSupport igValidationSupport =new IGValidationSupport(r4ctx, validationIgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(validationSupportChain);
+            igValidationSupport.createSnapshots(context, validationSupportChain);
         }
 
 

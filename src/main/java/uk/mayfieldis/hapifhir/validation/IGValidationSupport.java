@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -115,29 +116,7 @@ public class IGValidationSupport implements IValidationSupport
         return structureDefinition;
     }
 
-    public void createSnapshots(IValidationSupport validationSupport) {
-        // This doesn't work needs IWorkerContext .
-        for (StructureDefinition structureDefinition : myStructureDefinitions.values()) {
-            if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                LOG.debug("Missing Snapshot {}", structureDefinition.getUrl());
-                ProfileUtilities tool = new ProfileUtilities(null, null, null);
-                StructureDefinition base = (StructureDefinition) validationSupport.fetchStructureDefinition(structureDefinition.getBaseDefinition());
-                try {
-                    tool.generateSnapshot(base,
-                            structureDefinition,
-                            structureDefinition.getUrl(),
-                            "https://fhir.nhs.uk/R4",
-                            structureDefinition.getName());
-                    if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                        LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
-                    }
-                } catch (Exception ex) {
 
-                    LOG.error("Error creating snapshot for {} = {}",structureDefinition.getUrl(),ex.getMessage());;
-                }
-            }
-        }
-    }
 
     @Override
     public List<IBaseResource> fetchAllConformanceResources() {
@@ -160,15 +139,31 @@ public class IGValidationSupport implements IValidationSupport
             return !theClass.equals(ValueSet.class) && !theUri.startsWith("http://hl7.org/fhir/ValueSet/") ? null : (T) this.fetchValueSet(theUri);
         }
     }
-    /*
-      @Override
-      public IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
-          super();
-      }
-  */
+
     private DomainResource fetchCodeSystemOrValueSet(String theSystem, boolean codeSystem) {
         synchronized(this) {
             return codeSystem ? (DomainResource)((Map)this.myCodeSystems).get(theSystem) : (DomainResource)((Map)this.myValueSets).get(theSystem);
+        }
+    }
+
+    public void createSnapshots(IWorkerContext context, IValidationSupport validationSupport) {
+        // This doesn't work needs IWorkerContext .
+        for (StructureDefinition structureDefinition : myStructureDefinitions.values()) {
+            if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                LOG.debug("Missing Snapshot {}", structureDefinition.getUrl());
+                ProfileUtilities tool = new ProfileUtilities(context, null, null);
+                StructureDefinition base = (StructureDefinition) validationSupport.fetchStructureDefinition(structureDefinition.getBaseDefinition());
+
+                tool.generateSnapshot(base,
+                        structureDefinition,
+                        structureDefinition.getUrl(),
+                        "https://fhir.nhs.uk/R4",
+                        structureDefinition.getName());
+                if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                    LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
+                }
+
+            }
         }
     }
 
