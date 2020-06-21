@@ -8,10 +8,13 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.support.BaseValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.terminologies.ValueSetCheckerSimple;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

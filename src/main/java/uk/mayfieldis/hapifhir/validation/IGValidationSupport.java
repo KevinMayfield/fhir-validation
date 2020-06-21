@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -47,7 +48,7 @@ public class IGValidationSupport implements IValidationSupport
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
             LOG.info("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
             if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                LOG.error("Missing Snapshot {}", structureDefinition.getUrl());
+                LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
             }
             this.myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }
@@ -76,6 +77,18 @@ public class IGValidationSupport implements IValidationSupport
     }
 
     @Override
+    public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
+        LOG.info("isValueSetSupported {}",theValueSetUrl);
+        return (this.fetchCodeSystemOrValueSet(theValueSetUrl, false) != null) ? true : false;
+    }
+
+    @Override
+    public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
+        LOG.info("isCodeSystemSupported {}",theSystem);
+        return (this.fetchCodeSystemOrValueSet(theSystem, true) != null) ? true : false;
+    }
+
+    @Override
     public List<StructureDefinition> fetchAllStructureDefinitions() {
         LOG.debug("fetchAllStructureDefinitions ALL");
         return new ArrayList<>(this.myStructureDefinitions.values());
@@ -83,7 +96,7 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public CodeSystem fetchCodeSystem(String theSystem) {
-        LOG.debug("fetchCodeSystem {}",theSystem);
+        LOG.info("fetchCodeSystem {}",theSystem);
         return (CodeSystem)this.fetchCodeSystemOrValueSet(theSystem, true);
     }
 
@@ -91,25 +104,39 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public ValueSet fetchValueSet(String uri) {
-        LOG.debug("fetchValueSet {}",uri);
+        LOG.info("fetchValueSet {}",uri);
         return (ValueSet)this.fetchCodeSystemOrValueSet( uri, false);
     }
 
     @Override
     public StructureDefinition fetchStructureDefinition(String url) {
         StructureDefinition structureDefinition = (StructureDefinition)this.myStructureDefinitions.get(url);
-        if (structureDefinition !=null) {
-            LOG.debug("fetchStructureDefinition {} Found {}", url, npm.getPath());
-        } else {
-            LOG.debug("fetchStructureDefinition {} Not Present {}", url, npm.getPath());
-        }
+
         return structureDefinition;
     }
 
-    @Override
-    public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
-        LOG.debug("isCodeSystemSupported {}",theSystem);
-        return false;
+    public void createSnapshots(IValidationSupport validationSupport) {
+        // This doesn't work needs IWorkerContext .
+        for (StructureDefinition structureDefinition : myStructureDefinitions.values()) {
+            if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                LOG.debug("Missing Snapshot {}", structureDefinition.getUrl());
+                ProfileUtilities tool = new ProfileUtilities(null, null, null);
+                StructureDefinition base = (StructureDefinition) validationSupport.fetchStructureDefinition(structureDefinition.getBaseDefinition());
+                try {
+                    tool.generateSnapshot(base,
+                            structureDefinition,
+                            structureDefinition.getUrl(),
+                            "https://fhir.nhs.uk/R4",
+                            structureDefinition.getName());
+                    if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                        LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
+                    }
+                } catch (Exception ex) {
+
+                    LOG.error("Error creating snapshot for {} = {}",structureDefinition.getUrl(),ex.getMessage());;
+                }
+            }
+        }
     }
 
     @Override

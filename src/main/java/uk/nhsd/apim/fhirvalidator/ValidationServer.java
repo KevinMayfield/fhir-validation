@@ -3,6 +3,7 @@ package uk.nhsd.apim.fhirvalidator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
@@ -11,6 +12,7 @@ import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,10 +35,7 @@ import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSuppo
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 import uk.nhsd.apim.fhirvalidator.FHIRServer.FHIRRestfulServer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //CHECKSTYLE:OFF
 
@@ -134,22 +133,24 @@ public class ValidationServer extends SpringBootServletInitializer {
 
         if (serverIgPackage !=null) {
             //npmPackageList.add(serverIgPackage);
-            validationSupportChain.addValidationSupport(new IGValidationSupport(r4ctx, serverIgPackage));
+            IGValidationSupport igValidationSupport = new IGValidationSupport(r4ctx, serverIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+            igValidationSupport.createSnapshots(validationSupportChain);
         }
 
         if (validationIgPackage !=null) {
             //npmPackageList.add(validationIgPackage);
-            validationSupportChain.addValidationSupport(new IGValidationSupport(r4ctx, validationIgPackage));
+            IGValidationSupport igValidationSupport =new IGValidationSupport(r4ctx, validationIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+            igValidationSupport.createSnapshots(validationSupportChain);
         }
 
 
-        if (!FHIRServerProperties.getValidateTerminologyEnabled()) {
+        if (FHIRServerProperties.getValidateTerminologyEnabled()) {
+            // Use in memory validation firt
            validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
-        } else {
-            // Try InMemory first??
 
-            validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
-
+           if (FHIRServerProperties.getTerminologyServer() != null) {
 
             // Use ontoserver
             // Create a module that uses a remote terminology service
@@ -157,6 +158,8 @@ public class ValidationServer extends SpringBootServletInitializer {
             RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
             remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
             validationSupportChain.addValidationSupport(remoteTermSvc);
+           }
+
         }
 // Wrap the chain in a cache to improve performance
         CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
@@ -170,7 +173,9 @@ public class ValidationServer extends SpringBootServletInitializer {
         FhirInstanceValidator instanceValidator = new FhirInstanceValidator(r4ctx);
         val.registerValidatorModule(instanceValidator);
 
+
         instanceValidator.setValidationSupport(validationSupportChain);
+
 
         return instanceValidator;
     }
