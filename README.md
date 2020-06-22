@@ -1,4 +1,4 @@
-# FHIR Validation
+# FHIR Validation Service
 
 ## Getting Started
 
@@ -37,8 +37,8 @@ The `hapi.properties` contains the settings for the validator.
  | --- | --- | --- |
  | validate.flag | true | Leave set to true | 
  |server.ig.package | UK.DM.r4 | |
-|server.ig.version | 0.0.6-dev ||
-|server.ig.url | https://packages.simplifier.net/UK.DM.r4/-/UK.DM.r4-0.0.6-dev.tgz | Url of the validation package containing service specific rules |
+|server.ig.version | 0.0.7-dev ||
+|server.ig.url | https://packages.simplifier.net/UK.DM.r4/-/UK.DM.r4-0.0.7-dev.tgz | Url of the validation package containing service specific rules |
 |validation.ig.package | UK.Core.r4 ||
 |validation.ig.version | 1.1.0 ||
 |validation.ig.url | https://packages.simplifier.net/UK.Core.r4/-/UK.Core.r4-1.1.0.tgz | Url of the base validation package |
