@@ -138,18 +138,20 @@ public class ValidationServer extends SpringBootServletInitializer {
 
         IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
 
-        if (serverIgPackage !=null) {
-            //npmPackageList.add(serverIgPackage);
-            IGValidationSupport igValidationSupport = new IGValidationSupport(r4ctx, serverIgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(context, validationSupportChain);
-        }
 
         if (validationIgPackage !=null) {
             //npmPackageList.add(validationIgPackage);
-            IGValidationSupport igValidationSupport =new IGValidationSupport(r4ctx, validationIgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(context, validationSupportChain);
+            IGValidationSupport igCoreVS =new IGValidationSupport(r4ctx, validationIgPackage);
+            validationSupportChain.addValidationSupport(igCoreVS);
+            igCoreVS.createSnapshots(context, validationSupportChain);
+        }
+
+
+        if (serverIgPackage !=null) {
+            // Ordering is important here. Need core loaded before validation package
+            IGValidationSupport igServerVS = new IGValidationSupport(r4ctx, serverIgPackage);
+            validationSupportChain.addValidationSupport(igServerVS);
+            igServerVS.createSnapshots(context, validationSupportChain);
         }
 
 

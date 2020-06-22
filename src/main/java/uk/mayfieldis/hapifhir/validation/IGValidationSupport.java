@@ -47,20 +47,20 @@ public class IGValidationSupport implements IValidationSupport
         for (String resource : npm.listResources( "StructureDefinition")) {
 
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.info("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
+            LOG.debug("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
             if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
+                LOG.info("Missing Snapshot {}", structureDefinition.getUrl());
             }
             this.myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }
         for (String resource : npm.listResources("ValueSet")) {
             ValueSet valueSet = (ValueSet) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.info("Loading: {}", valueSet.getUrl());
+            LOG.debug("Loading: {}", valueSet.getUrl());
             this.myValueSets.put(valueSet.getUrl(), valueSet);
         }
         for (String resource : npm.listResources("CodeSystem")) {
             CodeSystem codeSys = (CodeSystem) ctx.newJsonParser().parseResource(npm.load("package", resource));
-            LOG.info("Loading: {}", codeSys.getUrl());
+            LOG.debug("Loading: {}", codeSys.getUrl());
             this.myCodeSystems.put(codeSys.getUrl(), codeSys);
         }
 
@@ -79,13 +79,13 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String theValueSetUrl) {
-        LOG.info("isValueSetSupported {}",theValueSetUrl);
+        LOG.debug("isValueSetSupported {}",theValueSetUrl);
         return (this.fetchCodeSystemOrValueSet(theValueSetUrl, false) != null) ? true : false;
     }
 
     @Override
     public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String theSystem) {
-        LOG.info("isCodeSystemSupported {}",theSystem);
+        LOG.debug("isCodeSystemSupported {}",theSystem);
         return (this.fetchCodeSystemOrValueSet(theSystem, true) != null) ? true : false;
     }
 
@@ -97,7 +97,7 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public CodeSystem fetchCodeSystem(String theSystem) {
-        LOG.info("fetchCodeSystem {}",theSystem);
+        LOG.debug("fetchCodeSystem {}",theSystem);
         return (CodeSystem)this.fetchCodeSystemOrValueSet(theSystem, true);
     }
 
@@ -105,7 +105,7 @@ public class IGValidationSupport implements IValidationSupport
 
     @Override
     public ValueSet fetchValueSet(String uri) {
-        LOG.info("fetchValueSet {}",uri);
+        LOG.debug("fetchValueSet {}",uri);
         return (ValueSet)this.fetchCodeSystemOrValueSet( uri, false);
     }
 
@@ -147,24 +147,36 @@ public class IGValidationSupport implements IValidationSupport
     }
 
     public void createSnapshots(IWorkerContext context, IValidationSupport validationSupport) {
-        // This doesn't work needs IWorkerContext .
+
+        ProfileUtilities tool = new ProfileUtilities(context, null, null);
+
         for (StructureDefinition structureDefinition : myStructureDefinitions.values()) {
             if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                LOG.debug("Missing Snapshot {}", structureDefinition.getUrl());
-                ProfileUtilities tool = new ProfileUtilities(context, null, null);
-                StructureDefinition base = (StructureDefinition) validationSupport.fetchStructureDefinition(structureDefinition.getBaseDefinition());
-
-                tool.generateSnapshot(base,
-                        structureDefinition,
-                        structureDefinition.getUrl(),
-                        "https://fhir.nhs.uk/R4",
-                        structureDefinition.getName());
-                if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                    LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
-                }
-
+               buildSnapshot(validationSupport,tool,structureDefinition);
             }
         }
+    }
+    public StructureDefinition buildSnapshot(IValidationSupport validationSupport, ProfileUtilities tool, StructureDefinition structureDefinition) {
+        LOG.info("Creating Snapshot {}", structureDefinition.getUrl());
+
+        StructureDefinition base = (StructureDefinition) validationSupport.fetchStructureDefinition(structureDefinition.getBaseDefinition());
+        if (base != null) {
+            if (!base.hasSnapshot() && base.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                LOG.warn("Base Missing Snapshot {}", base.getUrl());
+                base = buildSnapshot(validationSupport,tool,base);
+            }
+            tool.generateSnapshot(base,
+                    structureDefinition,
+                    structureDefinition.getUrl(),
+                    "https://fhir.nhs.uk/R4",
+                    structureDefinition.getName());
+            if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+                LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
+            }
+        } else {
+            LOG.error("No base profile for {}",structureDefinition.getUrl());
+        }
+        return structureDefinition;
     }
 
 
