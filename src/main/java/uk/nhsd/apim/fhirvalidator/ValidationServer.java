@@ -154,10 +154,11 @@ public class ValidationServer extends SpringBootServletInitializer {
 
 
         if (FHIRServerProperties.getValidateTerminologyEnabled()) {
-            // Use in memory validation firt
-           validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
-
            if (FHIRServerProperties.getTerminologyServer() != null) {
+
+               // Use in memory validation first
+               // Note: this requires ValueSets to be expanded
+               validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
 
             // Use ontoserver
             // Create a module that uses a remote terminology service
@@ -165,6 +166,8 @@ public class ValidationServer extends SpringBootServletInitializer {
             RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
             remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
             validationSupportChain.addValidationSupport(remoteTermSvc);
+           } else {
+
            }
 
         }

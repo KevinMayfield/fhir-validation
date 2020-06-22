@@ -13,8 +13,10 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.terminologies.ValueSetCheckerSimple;
+import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,6 +32,7 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
     private List<Object> myClientInterceptors = new ArrayList();
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoteTerminologyServiceValidationSupportOnto.class);
 
+    public static final String SNOMEDCT = "http://snomed.info/sct";
 
     public RemoteTerminologyServiceValidationSupportOnto(FhirContext theFhirContext) {
         super(theFhirContext);
@@ -78,18 +81,35 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
             ParametersUtil.addParameterToParametersString(this.getFhirContext(), input, "code", theCode);
             if (StringUtils.isNotBlank(theCodeSystem)) {
                 ParametersUtil.addParameterToParametersUri(this.getFhirContext(), input, "system", theCodeSystem);
+                if (theCodeSystem.equals(SNOMEDCT) && StringUtils.isNotBlank(FHIRServerProperties.getSnomedVersionUrl()) ) {
+                  ParametersUtil.addParameterToParametersString(this.getFhirContext(), input, "systemVersion", FHIRServerProperties.getSnomedVersionUrl() );
+                }
             }
 
             if (StringUtils.isNotBlank(theDisplay)) {
+
                 ParametersUtil.addParameterToParametersString(this.getFhirContext(), input, "display", theDisplay);
             }
 
             if (theValueSet != null) {
+
                 ParametersUtil.addParameterToParameters(this.getFhirContext(), input, "valueSet", theValueSet);
             }
-
-            IBaseParameters output = (IBaseParameters)((IOperationUnnamed)client.operation().onType("ValueSet")).named("validate-code").withParameters(input).execute();
+            IBaseParameters output = null;
+            try {
+                output = (IBaseParameters)((IOperationUnnamed)client.operation()
+                    .onType("ValueSet"))
+                    .named("validate-code")
+                    .withParameters(input)
+                    .execute();
+            } catch (
+                    Exception validationError
+            ) {
+                LOG.error(validationError.getMessage());
+                throw validationError;
+            }
             List<String> resultValues = ParametersUtil.getNamedParameterValuesAsString(this.getFhirContext(), output, "result");
+
             if (resultValues.size() >= 1 && !StringUtils.isBlank((CharSequence)resultValues.get(0))) {
                 Validate.isTrue(resultValues.size() == 1, "Response contained %d 'result' values", (long)resultValues.size());
                 boolean success = "true".equalsIgnoreCase((String)resultValues.get(0));
