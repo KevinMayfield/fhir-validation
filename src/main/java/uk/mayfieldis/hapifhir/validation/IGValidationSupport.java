@@ -49,7 +49,7 @@ public class IGValidationSupport implements IValidationSupport
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
             LOG.debug("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
             if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                LOG.info("Missing Snapshot {}", structureDefinition.getUrl());
+                LOG.debug("Missing Snapshot {}", structureDefinition.getUrl());
             }
             this.myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }
@@ -167,7 +167,7 @@ public class IGValidationSupport implements IValidationSupport
         }
     }
     public StructureDefinition buildSnapshot(IValidationSupport validationSupport, ProfileUtilities tool, StructureDefinition structureDefinition) {
-        LOG.info("Creating Snapshot {}", structureDefinition.getUrl());
+        LOG.debug("Creating Snapshot {}", structureDefinition.getUrl());
 
         StructureDefinition base = (StructureDefinition) validationSupport.fetchStructureDefinition(structureDefinition.getBaseDefinition());
         if (base != null) {

@@ -68,6 +68,13 @@ public class ServerFHIRValidation {
                         messageDefinitions.add(messageDefinition);
                     }
                 }
+                // For windows .... !!!
+                for (String uri : serverIgPackage.list("package\\examples")) {
+                    if (uri.startsWith("MessageDefinition")) {
+                        MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package\\examples", uri));
+                        messageDefinitions.add(messageDefinition);
+                    }
+                }
             } catch  (IOException ioex) {
                 log.error(ioex.getMessage());
                 throw new InternalErrorException(ioex.getMessage());
@@ -130,15 +137,16 @@ public class ServerFHIRValidation {
                 }
             }
             resource = bundle;
-        }
-        if (validationOptions == null || validationOptions.getProfiles().size() == 0) {
-            // Force validation to use minimum acceptable profile
-            setProfile(resource);
         } else {
-            // Expected validationOptions to take care of this but resorting to old fashioned profile selection
-            resource.getMeta().getProfile().clear();
-            for (String profile : validationOptions.getProfiles()) {
-                resource.getMeta().addProfile(profile);
+            if (validationOptions == null || validationOptions.getProfiles().size() == 0) {
+                // Force validation to use minimum acceptable profile
+                setProfile(resource);
+            } else {
+                // Expected validationOptions to take care of this but resorting to old fashioned profile selection
+                resource.getMeta().getProfile().clear();
+                for (String profile : validationOptions.getProfiles()) {
+                    resource.getMeta().addProfile(profile);
+                }
             }
         }
 
@@ -195,17 +203,21 @@ public class ServerFHIRValidation {
                 return new ValidationResult(ctx, messages);
             }
         }
+        // This section sets the meta.profile to be the one stated in the messageDefinition
         if ((bundle.hasEntry() && bundle.getType().equals(Bundle.BundleType.MESSAGE)) && messageDefinition != null) {
             if (bundle.getEntryFirstRep().getResource() instanceof MessageHeader) {
                 MessageHeader messageHeader = (MessageHeader) bundle.getEntryFirstRep().getResource();
                 for (Reference reference : messageHeader.getFocus()) {
                     for(Bundle.BundleEntryComponent entry : bundle.getEntry()) {
                         if (entry.getFullUrl().equals(reference.getReference())) {
+                            log.info("{}",entry.getResource().getClass().getSimpleName());
                             if (entry.getResource() instanceof DomainResource) {
                                 // Need to add in
                                 for (MessageDefinition.MessageDefinitionFocusComponent focusComponent : messageDefinition.getFocus()) {
-                                    log.info("Validating (from MessageDefinition.focus) as {}", focusComponent.getProfile());
-                                    if (focusComponent.getCode().equals(entry.getResource().getClass().getSimpleName())) {
+
+                                    if (focusComponent.getCode().equals(entry.getResource().getClass().getSimpleName())
+                                        && focusComponent.hasProfile()) {
+                                        log.info("Forcing resource profile conformance (from MessageDefinition.focus) to {} for entry {}", focusComponent.getProfile(), entry.getFullUrl());
                                         (entry.getResource()).getMeta().addProfile(focusComponent.getProfile());
                                     }
                                 }
