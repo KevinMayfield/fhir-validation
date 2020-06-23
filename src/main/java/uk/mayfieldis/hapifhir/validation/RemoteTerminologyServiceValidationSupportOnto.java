@@ -56,7 +56,7 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
     }
 
     public IValidationSupport.CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-        LOG.warn("validateCodeInValueSet {}",theCodeSystem);
+        LOG.debug("validateCodeInValueSet {}",theCodeSystem);
         // Should try to validate locally? KGM
 
         return this.invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, (String)null, theValueSet);

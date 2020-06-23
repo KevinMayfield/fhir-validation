@@ -3,20 +3,15 @@ package uk.nhsd.apim.fhirvalidator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,7 +32,6 @@ import uk.mayfieldis.hapifhir.validation.IGValidationSupport;
 import uk.mayfieldis.hapifhir.PackageManager;
 import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
-import uk.nhsd.apim.fhirvalidator.FHIRServer.FHIRRestfulServer;
 
 import java.util.*;
 
@@ -103,26 +97,26 @@ public class ValidationServer extends SpringBootServletInitializer {
         return serverIgPackage;
     }
 
-    @Bean(name="validationIgPackage")
-    public NpmPackage getValidationIgPackage() throws Exception {
+    @Bean(name="coreIgPackage")
+    public NpmPackage getCorenIgPackage() throws Exception {
         NpmPackage validationIgPackage =null;
 
-        if (!FHIRServerProperties.getValidationIgPackage().isEmpty()) {
-            validationIgPackage = PackageManager.getPackage(FHIRServerProperties.getValidationIgPackage(),
-                    FHIRServerProperties.getValidationIgVersion(),
-                    FHIRServerProperties.getValidationIgUrl());
+        if (!FHIRServerProperties.getCoreIgPackage().isEmpty()) {
+            validationIgPackage = PackageManager.getPackage(FHIRServerProperties.getCoreIgPackage(),
+                    FHIRServerProperties.getCoreIgVersion(),
+                    FHIRServerProperties.getCoreIgUrl());
             if (validationIgPackage== null)  throw new InternalErrorException("Unable to load API Server Conformance package");
         }
         return validationIgPackage;
     }
 
     @Bean
-    public ServerFHIRValidation getValidation(FhirValidator val, FhirContext ctx,  @Qualifier("validationIgPackage") NpmPackage validationIgPackage, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
-        return new ServerFHIRValidation(val,ctx,serverIgPackage,validationIgPackage);
+    public ServerFHIRValidation getValidation(FhirValidator val, FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
+        return new ServerFHIRValidation(val,ctx,serverIgPackage);
     }
 
     @Bean
-    public FhirInstanceValidator fhirInstanceValidator (FhirValidator val, FhirContext r4ctx, @Qualifier("validationIgPackage") NpmPackage validationIgPackage, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
+    public FhirInstanceValidator fhirInstanceValidator (FhirValidator val, FhirContext r4ctx, @Qualifier("coreIgPackage") NpmPackage coreIgPackage, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
 
 
         ValidationSupportChain
@@ -139,9 +133,9 @@ public class ValidationServer extends SpringBootServletInitializer {
         IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
 
 
-        if (validationIgPackage !=null) {
-            //npmPackageList.add(validationIgPackage);
-            IGValidationSupport igCoreVS =new IGValidationSupport(r4ctx, validationIgPackage);
+        if (coreIgPackage !=null) {
+
+            IGValidationSupport igCoreVS =new IGValidationSupport(r4ctx, coreIgPackage);
             validationSupportChain.addValidationSupport(igCoreVS);
             igCoreVS.createSnapshots(context, validationSupportChain);
         }
@@ -194,7 +188,7 @@ public class ValidationServer extends SpringBootServletInitializer {
 
 
     @Bean
-    public ServletRegistrationBean ServletRegistrationBean(FhirContext ctx, NpmPackage serverIgPackage) {
+    public ServletRegistrationBean ServletRegistrationBean(FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) {
 
         ServletRegistrationBean registration = new ServletRegistrationBean(new FHIRRestfulServer(context, ctx, serverIgPackage), "/R4/*");
         Map<String,String> params = new HashMap<>();

@@ -32,15 +32,15 @@ public class ServerFHIRValidation {
     private static final Logger log = LoggerFactory.getLogger(ServerFHIRValidation.class);
 
 
-    public ServerFHIRValidation(FhirValidator _validator, FhirContext _ctx, NpmPackage serverIgPackage, NpmPackage validationIgPackage) throws Exception
+    public ServerFHIRValidation(FhirValidator _validator, FhirContext _ctx, NpmPackage serverIgPackage) throws Exception
     {
-        this.setup(_validator, _ctx, serverIgPackage,validationIgPackage );
+        this.setup(_validator, _ctx, serverIgPackage );
     }
 
     public ServerFHIRValidation() {
     }
 
-    public void setup(FhirValidator _validator, FhirContext _ctx, NpmPackage serverIgPackage, NpmPackage validationIgPackage) throws Exception {
+    public void setup(FhirValidator _validator, FhirContext _ctx, NpmPackage serverIgPackage) throws Exception {
 
         this.validator = _validator;
         this.ctx = _ctx;
@@ -56,10 +56,17 @@ public class ServerFHIRValidation {
                     capabilityStatements.add(capabilityStatement);
                 }
                 messageDefinitions = new ArrayList<>();
+
                 for (String uri : serverIgPackage.listResources("MessageDefinition")) {
 
                     MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
                     messageDefinitions.add(messageDefinition);
+                }
+                for (String uri : serverIgPackage.list("package/examples")) {
+                    if (uri.startsWith("MessageDefinition")) {
+                        MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package/examples", uri));
+                        messageDefinitions.add(messageDefinition);
+                    }
                 }
             } catch  (IOException ioex) {
                 log.error(ioex.getMessage());

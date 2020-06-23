@@ -76,9 +76,9 @@ public class FHIRServerProperties {
     private static final String VALIDATE_SCHEMA = "validation.standard.schema";
     private static final String VALIDATE_SCHEMATRON = "validation.standard.schematron";
 
-    public static final String VALIDATION_IG_PACKAGE = "validation.ig.package";
-    public static final String VALIDATION_IG_VERSION = "validation.ig.version";
-    public static final String VALIDATION_IG_URL = "validation.ig.url";
+    public static final String CORE_IG_PACKAGE = "core.ig.package";
+    public static final String CORE_IG_VERSION = "core.ig.version";
+    public static final String CORE_IG_URL = "core.ig.url";
 
     public static final String SERVER_IG_DESCRIPTION = "server.ig.description";
     public static final String SERVER_IG_PACKAGE = "server.ig.package";
@@ -445,14 +445,14 @@ public class FHIRServerProperties {
         return FHIRServerProperties.getPropertyBoolean(BULK_EXPORT_ENABLED, true);
     }
 
-    public static String getValidationIgPackage() {
-        return FHIRServerProperties.getProperty(VALIDATION_IG_PACKAGE,"");
+    public static String getCoreIgPackage() {
+        return FHIRServerProperties.getProperty(CORE_IG_PACKAGE,"");
     }
-    public static String getValidationIgVersion() {
-        return FHIRServerProperties.getProperty(VALIDATION_IG_VERSION,"");
+    public static String getCoreIgVersion() {
+        return FHIRServerProperties.getProperty(CORE_IG_VERSION,"");
     }
-    public static String getValidationIgUrl() {
-        return FHIRServerProperties.getProperty(VALIDATION_IG_URL,"");
+    public static String getCoreIgUrl() {
+        return FHIRServerProperties.getProperty(CORE_IG_URL,"");
     }
 
     public static String getServerIgPackage() {

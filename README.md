@@ -39,9 +39,9 @@ The `hapi.properties` contains the settings for the validator.
  |server.ig.package | UK.DM.r4 | |
 |server.ig.version | 0.0.7-dev ||
 |server.ig.url | https://packages.simplifier.net/UK.DM.r4/-/UK.DM.r4-0.0.7-dev.tgz | Url of the validation package containing service specific rules |
-|validation.ig.package | UK.Core.r4 ||
-|validation.ig.version | 1.1.0 ||
-|validation.ig.url | https://packages.simplifier.net/UK.Core.r4/-/UK.Core.r4-1.1.0.tgz | Url of the base validation package |
+|core.ig.package | UK.Core.r4 ||
+|core.ig.version | 1.1.0 ||
+|core.ig.url | https://packages.simplifier.net/UK.Core.r4/-/UK.Core.r4-1.1.0.tgz | Url of the base validation package |
 |terminology.validation.flag |  true | Use to control terminology validation|
 |terminology.server | https://r4.ontoserver.csiro.au/fhir | If populated a remote terminology service will be used |
 |terminology.snomed.version | http://snomed.info/sct/999000031000000106/version/20200610 | This should state the SNOMED version for domain |
