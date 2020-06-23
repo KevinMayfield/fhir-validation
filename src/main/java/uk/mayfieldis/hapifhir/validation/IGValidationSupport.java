@@ -149,10 +149,20 @@ public class IGValidationSupport implements IValidationSupport
     public void createSnapshots(IWorkerContext context, IValidationSupport validationSupport) {
 
         ProfileUtilities tool = new ProfileUtilities(context, null, null);
-
+        // This section first processes the level 2 profiles and the following section the level derived
         for (StructureDefinition structureDefinition : myStructureDefinitions.values()) {
-            if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
+            if (!structureDefinition.hasSnapshot()
+                    && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)
+                    && structureDefinition.getBaseDefinition().contains("http://hl7.org/fhir/")
+            ) {
                buildSnapshot(validationSupport,tool,structureDefinition);
+            }
+        }
+        for (StructureDefinition structureDefinition : myStructureDefinitions.values()) {
+            if (!structureDefinition.hasSnapshot()
+                    && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)
+                    && !structureDefinition.getBaseDefinition().contains("http://hl7.org/fhir/")) {
+                buildSnapshot(validationSupport,tool,structureDefinition);
             }
         }
     }
