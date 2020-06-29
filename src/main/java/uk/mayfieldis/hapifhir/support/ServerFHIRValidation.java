@@ -209,7 +209,7 @@ public class ServerFHIRValidation {
                 MessageHeader messageHeader = (MessageHeader) bundle.getEntryFirstRep().getResource();
                 for (Reference reference : messageHeader.getFocus()) {
                     for(Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-                        if (entry.getFullUrl().equals(reference.getReference())) {
+                        if (entry.hasFullUrl() && entry.getFullUrl().equals(reference.getReference())) {
                             log.info("{}",entry.getResource().getClass().getSimpleName());
                             if (entry.getResource() instanceof DomainResource) {
                                 // Need to add in
