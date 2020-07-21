@@ -98,7 +98,7 @@ public class ValidationServer extends SpringBootServletInitializer {
     }
 
     @Bean(name="coreIgPackage")
-    public NpmPackage getCorenIgPackage() throws Exception {
+    public NpmPackage getCoreIgPackage() throws Exception {
         NpmPackage validationIgPackage =null;
 
         if (!FHIRServerProperties.getCoreIgPackage().isEmpty()) {
@@ -110,13 +110,43 @@ public class ValidationServer extends SpringBootServletInitializer {
         return validationIgPackage;
     }
 
+    @Bean(name="core2IgPackage")
+    public NpmPackage getCore2IgPackage() throws Exception {
+        NpmPackage validationIgPackage =null;
+
+        if (!FHIRServerProperties.getCore2IgPackage().isEmpty()) {
+            validationIgPackage = PackageManager.getPackage(FHIRServerProperties.getCore2IgPackage(),
+                    FHIRServerProperties.getCore2IgVersion(),
+                    FHIRServerProperties.getCore2IgUrl());
+            if (validationIgPackage== null)  throw new InternalErrorException("Unable to load API Server Conformance package");
+        }
+        return validationIgPackage;
+    }
+
+    @Bean(name="core3IgPackage")
+    public NpmPackage getCore3IgPackage() throws Exception {
+        NpmPackage validationIgPackage =null;
+
+        if (!FHIRServerProperties.getCore3IgPackage().isEmpty()) {
+            validationIgPackage = PackageManager.getPackage(FHIRServerProperties.getCore3IgPackage(),
+                    FHIRServerProperties.getCore3IgVersion(),
+                    FHIRServerProperties.getCore3IgUrl());
+            if (validationIgPackage== null)  throw new InternalErrorException("Unable to load API Server Conformance package");
+        }
+        return validationIgPackage;
+    }
+
     @Bean
     public ServerFHIRValidation getValidation(FhirValidator val, FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
         return new ServerFHIRValidation(val,ctx,serverIgPackage);
     }
 
     @Bean
-    public FhirInstanceValidator fhirInstanceValidator (FhirValidator val, FhirContext r4ctx, @Qualifier("coreIgPackage") NpmPackage coreIgPackage, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
+    public FhirInstanceValidator fhirInstanceValidator (FhirValidator val, FhirContext r4ctx,
+                                                        @Qualifier("coreIgPackage") NpmPackage validationIgPackage,
+                                                        @Qualifier("core2IgPackage") NpmPackage validation2IgPackage,
+                                                        @Qualifier("core3IgPackage") NpmPackage validation3IgPackage,
+                                                        @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
 
 
         ValidationSupportChain
@@ -126,45 +156,45 @@ public class ValidationServer extends SpringBootServletInitializer {
         validationSupportChain.addValidationSupport(defaultProfileValidationSupport);
 
 
-        // IGValidation support acts simlilar to PrePopulatedValidationSupport
-        List<NpmPackage> npmPackageList = new ArrayList<>();
-
-
         IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
 
 
-        if (coreIgPackage !=null) {
-
-            IGValidationSupport igCoreVS =new IGValidationSupport(r4ctx, coreIgPackage);
-            validationSupportChain.addValidationSupport(igCoreVS);
-            igCoreVS.createSnapshots(context, validationSupportChain);
+        if (validationIgPackage !=null) {
+            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validationIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+            igValidationSupport.createSnapshots(context, validationSupportChain);
         }
-
-
+        if (validation2IgPackage !=null) {
+            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validation2IgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+            igValidationSupport.createSnapshots(context, validationSupportChain);
+        }
+        if (validation3IgPackage !=null) {
+            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validation3IgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+            igValidationSupport.createSnapshots(context, validationSupportChain);
+        }
         if (serverIgPackage !=null) {
-            // Ordering is important here. Need core loaded before validation package
-            IGValidationSupport igServerVS = new IGValidationSupport(r4ctx, serverIgPackage);
-            validationSupportChain.addValidationSupport(igServerVS);
-            igServerVS.createSnapshots(context, validationSupportChain);
+            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, serverIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+            igValidationSupport.createSnapshots(context, validationSupportChain);
         }
-
 
         if (FHIRServerProperties.getValidateTerminologyEnabled()) {
-           if (FHIRServerProperties.getTerminologyServer() != null) {
+            // Use in memory validation first
+            // Note: this requires ValueSets to be expanded
+            validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
+               if (FHIRServerProperties.getTerminologyServer() != null) {
 
-               // Use in memory validation first
-               // Note: this requires ValueSets to be expanded
-               validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
+                // Use ontoserver
+                // Create a module that uses a remote terminology service
 
-            // Use ontoserver
-            // Create a module that uses a remote terminology service
+                RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
+                remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
+                validationSupportChain.addValidationSupport(remoteTermSvc);
+               } else {
 
-            RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
-            remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
-            validationSupportChain.addValidationSupport(remoteTermSvc);
-           } else {
-
-           }
+               }
 
         }
 // Wrap the chain in a cache to improve performance

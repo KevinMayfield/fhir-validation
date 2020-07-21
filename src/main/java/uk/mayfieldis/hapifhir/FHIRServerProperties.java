@@ -80,6 +80,14 @@ public class FHIRServerProperties {
     public static final String CORE_IG_VERSION = "core.ig.version";
     public static final String CORE_IG_URL = "core.ig.url";
 
+    public static final String CORE2_IG_PACKAGE = "core2.ig.package";
+    public static final String CORE2_IG_VERSION = "core2.ig.version";
+    public static final String CORE2_IG_URL = "core2.ig.url";
+
+    public static final String CORE3_IG_PACKAGE = "core3.ig.package";
+    public static final String CORE3_IG_VERSION = "core3.ig.version";
+    public static final String CORE3_IG_URL = "core3.ig.url";
+
     public static final String SERVER_IG_DESCRIPTION = "server.ig.description";
     public static final String SERVER_IG_PACKAGE = "server.ig.package";
     public static final String SERVER_IG_VERSION = "server.ig.version";
@@ -453,6 +461,26 @@ public class FHIRServerProperties {
     }
     public static String getCoreIgUrl() {
         return FHIRServerProperties.getProperty(CORE_IG_URL,"");
+    }
+
+    public static String getCore2IgPackage() {
+        return FHIRServerProperties.getProperty(CORE2_IG_PACKAGE,"");
+    }
+    public static String getCore2IgVersion() {
+        return FHIRServerProperties.getProperty(CORE2_IG_VERSION,"");
+    }
+    public static String getCore2IgUrl() {
+        return FHIRServerProperties.getProperty(CORE2_IG_URL,"");
+    }
+
+    public static String getCore3IgPackage() {
+        return FHIRServerProperties.getProperty(CORE3_IG_PACKAGE,"");
+    }
+    public static String getCore3IgVersion() {
+        return FHIRServerProperties.getProperty(CORE3_IG_VERSION,"");
+    }
+    public static String getCore3IgUrl() {
+        return FHIRServerProperties.getProperty(CORE3_IG_URL,"");
     }
 
     public static String getServerIgPackage() {
