@@ -1,8 +1,11 @@
 
 {
-  "_comments" : "Outpatient acute four item prescription, including one Schedule 2 controlled drug",
   "resourceType": "Bundle",
-  "id": "435c006d-e311-4c4e-8728-7026ed46dca4",
+  "id": "outpatient-4",
+  "identifier": {
+    "system": "https://tools.ietf.org/html/rfc4122",
+    "value": "46aedf33-61cd-43e8-b7ee-da42d20bdd75"
+  },
   "type": "message",
   "entry": [
     {
@@ -290,7 +293,7 @@
         "courseOfTherapyType": {
           "coding": [
             {
-              "system": "https://fhir.nhs.uk/R4/CodeSystem/UKCore-PrescriptionType",
+              "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
               "code": "acute",
               "display": "Acute"
             }
@@ -411,7 +414,7 @@
         "courseOfTherapyType": {
           "coding": [
             {
-              "system": "https://fhir.nhs.uk/R4/CodeSystem/UKCore-PrescriptionType",
+              "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
               "code": "acute",
               "display": "Acute"
             }
@@ -522,7 +525,7 @@
         "courseOfTherapyType": {
           "coding": [
             {
-              "system": "https://fhir.nhs.uk/R4/CodeSystem/UKCore-PrescriptionType",
+              "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
               "code": "acute",
               "display": "Acute"
             }
@@ -652,7 +655,7 @@
         "courseOfTherapyType": {
           "coding": [
             {
-              "system": "https://fhir.nhs.uk/R4/CodeSystem/UKCore-PrescriptionType",
+              "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
               "code": "acute",
               "display": "Acute"
             }

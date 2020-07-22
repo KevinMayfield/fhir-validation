@@ -1,7 +1,10 @@
 {
-  "_comments": "Outpatient acute single item prescription for a complete course of medication",
   "resourceType": "Bundle",
-  "id": "187ec06a-2823-4ea7-9512-5899af157480",
+  "id": "outpatient-1b",
+  "identifier": {
+    "system": "https://tools.ietf.org/html/rfc4122",
+    "value": "187ec06a-2823-4ea7-9512-5899af157480"
+  },
   "type": "message",
   "entry": [
     {
@@ -280,7 +283,7 @@
         "courseOfTherapyType": {
           "coding": [
             {
-              "system": "https://fhir.nhs.uk/R4/CodeSystem/UKCore-PrescriptionType",
+              "system": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
               "code": "acute",
               "display": "Acute"
             }
