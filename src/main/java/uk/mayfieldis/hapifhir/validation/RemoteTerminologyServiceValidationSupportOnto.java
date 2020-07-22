@@ -94,7 +94,14 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
             if (theValueSet != null) {
 
                 ParametersUtil.addParameterToParameters(this.getFhirContext(), input, "valueSet", theValueSet);
+                theValueSetUrl = ((ValueSet) theValueSet).getUrl();
+
+                if (theValueSet instanceof ValueSet && !StringUtils.isNotBlank(theCodeSystem)) {
+                    ValueSet valueSet = (ValueSet) theValueSet;
+                    ParametersUtil.addParameterToParametersUri(this.getFhirContext(), input, "system", valueSet.getCompose().getIncludeFirstRep().getSystem());
+                }
             }
+
             IBaseParameters output = null;
             try {
                 output = (IBaseParameters)((IOperationUnnamed)client.operation()
@@ -105,7 +112,7 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
             } catch (
                     Exception validationError
             ) {
-                LOG.error(validationError.getMessage());
+                LOG.error("validateCode Error: {} {} {} {} Msg = {}",theCodeSystem, theCode, theDisplay, theValueSetUrl, validationError.getMessage());
                 throw validationError;
             }
             List<String> resultValues = ParametersUtil.getNamedParameterValuesAsString(this.getFhirContext(), output, "result");
