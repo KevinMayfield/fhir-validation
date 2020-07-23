@@ -97,6 +97,9 @@ public class ServerFHIRValidation {
             if (var8 instanceof BaseServerResponseException) {
                 throw (BaseServerResponseException)var8;
             }
+            if (var8 instanceof IllegalArgumentException && var8.getCause() != null) {
+                throw new UnprocessableEntityException(var8.getCause().getMessage());
+            }
 
             throw new InternalErrorException(var8);
         }
