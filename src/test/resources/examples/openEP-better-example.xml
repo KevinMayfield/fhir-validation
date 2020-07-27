@@ -228,6 +228,7 @@
             <Encounter xmlns="http://hl7.org/fhir">
                 <id value="46588c8c-c606-420b-b3cc-88fb74f5d41b" />
                 <identifier>
+                    <system value="https://fhir.taunton.nhs.uk/Id/Encounter"/>
                     <value value="10071" />
                 </identifier>
                 <status value="unknown" />
@@ -237,6 +238,9 @@
                     <code value="HH" />
                     <display value="home health" />
                 </class>
+                <subject>
+                    <reference value="urn:uuid:c99b7aff-58fc-4e42-b8d4-80ac573e8bff"></reference>
+                </subject>
                 <location>
                     <location>
                         <display value="wordsworth" />
