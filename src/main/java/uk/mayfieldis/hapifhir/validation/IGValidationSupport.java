@@ -145,7 +145,7 @@ public class IGValidationSupport implements IValidationSupport
             return codeSystem ? (DomainResource)((Map)this.myCodeSystems).get(theSystem) : (DomainResource)((Map)this.myValueSets).get(theSystem);
         }
     }
-
+  /*
     public void createSnapshots(IWorkerContext context, IValidationSupport validationSupport) {
 
         ProfileUtilities tool = new ProfileUtilities(context, null, null);
@@ -166,6 +166,7 @@ public class IGValidationSupport implements IValidationSupport
             }
         }
     }
+
     public StructureDefinition buildSnapshot(IValidationSupport validationSupport, ProfileUtilities tool, StructureDefinition structureDefinition) {
         LOG.debug("Creating Snapshot {}", structureDefinition.getUrl());
 
@@ -188,6 +189,6 @@ public class IGValidationSupport implements IValidationSupport
         }
         return structureDefinition;
     }
-
+*/
 
 }

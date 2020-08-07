@@ -234,6 +234,16 @@
               "code": "1001",
               "display": "Outpatient Community Prescriber - Medical Prescriber"
             }
+          },
+          {
+            "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-MedicationRequest-Account",
+            "valueReference": {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "RBACC01"
+              },
+              "display": "TAUNTON AND SOMERSET NHS FOUNDATION TRUST COST CENTRE 01"
+            }
           }
         ],
         "identifier": [
@@ -318,7 +328,7 @@
         "dispenseRequest": {
           "extension": [
             {
-              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerType",
+              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerSiteType",
               "valueCoding": {
                 "system": "https://fhir.nhs.uk/R4/CodeSystem/dispensing-site-preference",
                 "code": "0004"
@@ -360,6 +370,16 @@
             "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-ResponsiblePractitioner",
             "valueReference": {
               "reference": "urn:uuid:56166769-c1c4-4d07-afa8-132b5dfca645"
+            }
+          },
+          {
+            "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-MedicationRequest-Account",
+            "valueReference": {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "RBACC01"
+              },
+              "display": "TAUNTON AND SOMERSET NHS FOUNDATION TRUST COST CENTRE 01"
             }
           }
         ],
@@ -429,7 +449,7 @@
         "dispenseRequest": {
           "extension": [
             {
-              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerType",
+              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerSiteType",
               "valueCoding": {
                 "system": "https://fhir.nhs.uk/R4/CodeSystem/dispensing-site-preference",
                 "code": "0004"
@@ -471,6 +491,16 @@
             "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-ResponsiblePractitioner",
             "valueReference": {
               "reference": "urn:uuid:56166769-c1c4-4d07-afa8-132b5dfca645"
+            }
+          },
+          {
+            "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-MedicationRequest-Account",
+            "valueReference": {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "RBACC01"
+              },
+              "display": "TAUNTON AND SOMERSET NHS FOUNDATION TRUST COST CENTRE 01"
             }
           }
         ],
@@ -556,7 +586,7 @@
         "dispenseRequest": {
           "extension": [
             {
-              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerType",
+              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerSiteType",
               "valueCoding": {
                 "system": "https://fhir.nhs.uk/R4/CodeSystem/dispensing-site-preference",
                 "code": "0004"
@@ -598,6 +628,16 @@
             "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-ResponsiblePractitioner",
             "valueReference": {
               "reference": "urn:uuid:56166769-c1c4-4d07-afa8-132b5dfca645"
+            }
+          },
+          {
+            "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-DM-MedicationRequest-Account",
+            "valueReference": {
+              "identifier": {
+                "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+                "value": "RBACC01"
+              },
+              "display": "TAUNTON AND SOMERSET NHS FOUNDATION TRUST COST CENTRE 01"
             }
           }
         ],
@@ -691,7 +731,7 @@
         "dispenseRequest": {
           "extension": [
             {
-              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerType",
+              "url": "https://fhir.nhs.uk/R4/StructureDefinition/Extension-performerSiteType",
               "valueCoding": {
                 "system": "https://fhir.nhs.uk/R4/CodeSystem/dispensing-site-preference",
                 "code": "0004"

@@ -7,11 +7,14 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -162,28 +165,27 @@ public class ValidationServer extends SpringBootServletInitializer {
         if (validationIgPackage !=null) {
             IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validationIgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(context, validationSupportChain);
+
         }
         if (validation2IgPackage !=null) {
             IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validation2IgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(context, validationSupportChain);
+
         }
         if (validation3IgPackage !=null) {
             IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validation3IgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(context, validationSupportChain);
         }
         if (serverIgPackage !=null) {
             IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, serverIgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
-            igValidationSupport.createSnapshots(context, validationSupportChain);
         }
 
         if (FHIRServerProperties.getValidateTerminologyEnabled()) {
             // Use in memory validation first
             // Note: this requires ValueSets to be expanded
             validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
+
                if (FHIRServerProperties.getTerminologyServer() != null) {
 
                 // Use ontoserver
@@ -195,10 +197,29 @@ public class ValidationServer extends SpringBootServletInitializer {
                } else {
 
                }
+        }
+        SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
+        validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
 
+        for (IBaseResource resource: validationSupportChain.fetchAllStructureDefinitions()) {
+            if (resource instanceof StructureDefinition) {
+                StructureDefinition structureDefinition = (StructureDefinition) resource;
+                if (!structureDefinition.hasSnapshot()
+                        && structureDefinition.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT
+                        && structureDefinition.getBaseDefinition().startsWith("http://hl7.org/fhir/")) {
+                    validationSupportChain.generateSnapshot(validationSupportChain,
+                            structureDefinition,
+                            structureDefinition.getUrl(),
+                            "https://fhir.nhs.uk/R4",
+                            structureDefinition.getName());
+                }
+
+            }
         }
 // Wrap the chain in a cache to improve performance
         CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
+
+
 
         // We try the above validators first
 
