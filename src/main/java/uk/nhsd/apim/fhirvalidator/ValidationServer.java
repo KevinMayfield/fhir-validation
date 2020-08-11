@@ -6,11 +6,8 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
@@ -31,7 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
-import uk.mayfieldis.hapifhir.validation.IGValidationSupport;
+import uk.mayfieldis.hapifhir.validation.NPMConformanceParser;
 import uk.mayfieldis.hapifhir.PackageManager;
 import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
@@ -161,32 +158,12 @@ public class ValidationServer extends SpringBootServletInitializer {
 
         IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
 
-
-        if (validationIgPackage !=null) {
-            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validationIgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-
-        }
-        if (validation2IgPackage !=null) {
-            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validation2IgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-
-        }
-        if (validation3IgPackage !=null) {
-            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, validation3IgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-        }
-        if (serverIgPackage !=null) {
-            IGValidationSupport igValidationSupport = new IGValidationSupport(ctx, serverIgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-        }
-
         if (FHIRServerProperties.getValidateTerminologyEnabled()) {
             // Use in memory validation first
             // Note: this requires ValueSets to be expanded
             validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
 
-               if (FHIRServerProperties.getTerminologyServer() != null) {
+            if (FHIRServerProperties.getTerminologyServer() != null) {
 
                 // Use ontoserver
                 // Create a module that uses a remote terminology service
@@ -194,10 +171,30 @@ public class ValidationServer extends SpringBootServletInitializer {
                 RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
                 remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
                 validationSupportChain.addValidationSupport(remoteTermSvc);
-               } else {
+            } else {
 
-               }
+            }
         }
+        if (validationIgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport= NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validationIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+
+        }
+        if (validation2IgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation2IgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+
+        }
+        if (validation3IgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation3IgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+        }
+        if (serverIgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, serverIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+        }
+
+
         SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
         validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
 
