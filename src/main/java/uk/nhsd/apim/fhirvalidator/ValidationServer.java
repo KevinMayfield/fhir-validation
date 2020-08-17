@@ -3,7 +3,6 @@ package uk.nhsd.apim.fhirvalidator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
@@ -169,10 +168,10 @@ public class ValidationServer extends SpringBootServletInitializer {
                 // Use ontoserver
                 // Create a module that uses a remote terminology service
 
-          //      RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
-          //      remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
-                RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
+                RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
                 remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
+         //       RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
+         //       remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
                 validationSupportChain.addValidationSupport(remoteTermSvc);
             } else {
 
@@ -198,21 +197,20 @@ public class ValidationServer extends SpringBootServletInitializer {
         }
 
 
-        uk.mayfieldis.hapifhir.support.SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new uk.mayfieldis.hapifhir.support.SnapshotGeneratingValidationSupport(ctx);
+      //  uk.mayfieldis.hapifhir.support.SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new uk.mayfieldis.hapifhir.support.SnapshotGeneratingValidationSupport(ctx);
+      //  validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
+
+        SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
         validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
 
-        //SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
-       // validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
 
-/*
-        ValidationSupportContext validationSupportContext = new ValidationSupportContext(validationSupportChain);
         for (IBaseResource resource: validationSupportChain.fetchAllStructureDefinitions()) {
             if (resource instanceof StructureDefinition) {
                 StructureDefinition structureDefinition = (StructureDefinition) resource;
                 if (!structureDefinition.hasSnapshot()
                         && structureDefinition.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT
                         && structureDefinition.getBaseDefinition().startsWith("http://hl7.org/fhir/")) {
-                    validationSupportChain.generateSnapshot(validationSupportContext,
+                    validationSupportChain.generateSnapshot(validationSupportChain,
                             structureDefinition,
                             structureDefinition.getUrl(),
                             "https://fhir.nhs.uk/R4",
@@ -221,7 +219,7 @@ public class ValidationServer extends SpringBootServletInitializer {
 
             }
         }
-*/
+
 
 // Wrap the chain in a cache to improve performance
         CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);

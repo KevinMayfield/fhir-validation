@@ -8,14 +8,11 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.support.BaseValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.terminologies.ValueSetCheckerSimple;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import javax.annotation.Nonnull;
@@ -26,7 +23,7 @@ import java.util.List;
 
 public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidationSupport implements IValidationSupport {
 
-   // 21/6/2020 KGM Needs to reflect https://github.com/hapifhir/org.hl7.fhir.core/blob/master/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/context/BaseWorkerContext.java
+    // 21/6/2020 KGM Needs to reflect https://github.com/hapifhir/org.hl7.fhir.core/blob/master/org.hl7.fhir.r4/src/main/java/org/hl7/fhir/r4/context/BaseWorkerContext.java
 
     private String myBaseUrl;
     private List<Object> myClientInterceptors = new ArrayList();
@@ -38,9 +35,8 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
         super(theFhirContext);
     }
 
-    @Override
-    public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-
+    public IValidationSupport.CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+        LOG.warn("validateCode {}",theCodeSystem);
         return this.invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, (IBaseResource)null);
     }
 
@@ -56,9 +52,7 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
         return retVal;
     }
 
-    @Override
-    public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
-
+    public IValidationSupport.CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
         LOG.debug("validateCodeInValueSet {}",theCodeSystem);
         // Should try to validate locally? KGM
 
@@ -66,11 +60,10 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
     }
 
     @Override
-    public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+    public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
         LOG.error("expandValueSet");
         return null;
     }
-
 
     protected IValidationSupport.CodeValidationResult invokeRemoteValidateCode(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
         if (StringUtils.isBlank(theCode)) {
@@ -86,7 +79,7 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
             if (StringUtils.isNotBlank(theCodeSystem)) {
                 ParametersUtil.addParameterToParametersUri(this.getFhirContext(), input, "system", theCodeSystem);
                 if (theCodeSystem.equals(SNOMEDCT) && StringUtils.isNotBlank(FHIRServerProperties.getSnomedVersionUrl()) ) {
-                  ParametersUtil.addParameterToParametersString(this.getFhirContext(), input, "systemVersion", FHIRServerProperties.getSnomedVersionUrl() );
+                    ParametersUtil.addParameterToParametersString(this.getFhirContext(), input, "systemVersion", FHIRServerProperties.getSnomedVersionUrl() );
                 }
             }
 
@@ -109,10 +102,10 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
             IBaseParameters output = null;
             try {
                 output = (IBaseParameters)((IOperationUnnamed)client.operation()
-                    .onType("ValueSet"))
-                    .named("validate-code")
-                    .withParameters(input)
-                    .execute();
+                        .onType("ValueSet"))
+                        .named("validate-code")
+                        .withParameters(input)
+                        .execute();
             } catch (
                     Exception validationError
             ) {
