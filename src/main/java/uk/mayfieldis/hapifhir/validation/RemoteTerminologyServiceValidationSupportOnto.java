@@ -38,8 +38,9 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
         super(theFhirContext);
     }
 
-    public IValidationSupport.CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-        LOG.warn("validateCode {}",theCodeSystem);
+    @Override
+    public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+
         return this.invokeRemoteValidateCode(theCodeSystem, theCode, theDisplay, theValueSetUrl, (IBaseResource)null);
     }
 
@@ -55,7 +56,9 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
         return retVal;
     }
 
-    public IValidationSupport.CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+    @Override
+    public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+
         LOG.debug("validateCodeInValueSet {}",theCodeSystem);
         // Should try to validate locally? KGM
 
@@ -63,10 +66,11 @@ public class RemoteTerminologyServiceValidationSupportOnto extends BaseValidatio
     }
 
     @Override
-    public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+    public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
         LOG.error("expandValueSet");
         return null;
     }
+
 
     protected IValidationSupport.CodeValidationResult invokeRemoteValidateCode(String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl, IBaseResource theValueSet) {
         if (StringUtils.isBlank(theCode)) {

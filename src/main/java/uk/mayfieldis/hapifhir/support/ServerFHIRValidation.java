@@ -9,7 +9,6 @@ import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.utilities.cache.NpmPackage;
-import org.hl7.fhir.utilities.cache.PackageCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ public class ServerFHIRValidation {
     List<MessageDefinition> messageDefinitions = null;
     FhirContext ctx;
 
-    PackageCacheManager pcm;
+  //  PackageCacheManager pcm;
     NpmPackage serverIgPackage;
 
     private static final Logger log = LoggerFactory.getLogger(ServerFHIRValidation.class);

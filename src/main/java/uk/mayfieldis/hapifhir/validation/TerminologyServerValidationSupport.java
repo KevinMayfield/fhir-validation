@@ -3,6 +3,7 @@ package uk.mayfieldis.hapifhir.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -58,7 +59,7 @@ public class TerminologyServerValidationSupport implements IValidationSupport {
     }
 
     @Override
-    public boolean isCodeSystemSupported(IValidationSupport theRootValidationSupport, String uri) {
+    public boolean isCodeSystemSupported(ValidationSupportContext theRootValidationSupport, String uri) {
         if (notSupportedCodeSystem.contains(uri)) return false;
         if (myCodeSystems.get(uri) != null) return true;
         return fetchCodeSystem(uri) != null;
@@ -66,7 +67,7 @@ public class TerminologyServerValidationSupport implements IValidationSupport {
 
 
     @Override
-    public CodeValidationResult validateCode(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String
+    public CodeValidationResult validateCode(ValidationSupportContext theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String
     theCode, String theDisplay, String valueSetUri) {
         Parameters params = new Parameters();
 
@@ -188,24 +189,24 @@ public class TerminologyServerValidationSupport implements IValidationSupport {
 
 
     @Override
-    public CodeValidationResult validateCodeInValueSet(IValidationSupport theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+    public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theRootValidationSupport, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
         return null;
     }
 
     @Override
-    public LookupCodeResult lookupCode(IValidationSupport theRootValidationSupport, String theSystem, String theCode) {
+    public LookupCodeResult lookupCode(ValidationSupportContext theRootValidationSupport, String theSystem, String theCode) {
         return null;
     }
 
     @Override
-    public boolean isValueSetSupported(IValidationSupport theRootValidationSupport, String uri) {
+    public boolean isValueSetSupported(ValidationSupportContext theRootValidationSupport, String uri) {
         if (notSupportedValueSet.contains(uri)) return false;
         if (myValueSets.get(uri) != null) return true;
         return fetchValueSet(uri) != null;
     }
 
     @Override
-    public IBaseResource generateSnapshot(IValidationSupport theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+    public IBaseResource generateSnapshot(ValidationSupportContext theRootValidationSupport, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
         return null;
     }
 
@@ -220,7 +221,7 @@ public class TerminologyServerValidationSupport implements IValidationSupport {
     }
 
     @Override
-    public ValueSetExpansionOutcome expandValueSet(IValidationSupport theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+    public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theRootValidationSupport, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 
 
         ValueSetExpansionOutcome expand = null;
