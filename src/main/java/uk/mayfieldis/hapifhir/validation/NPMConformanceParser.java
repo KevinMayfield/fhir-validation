@@ -40,7 +40,7 @@ public class NPMConformanceParser
             StructureDefinition structureDefinition = (StructureDefinition) ctx.newJsonParser().parseResource(npm.load("package", resource));
             LOG.debug("Loading: {} fhirVersion {}",structureDefinition.getUrl(), structureDefinition.getFhirVersion().toString());
             if (!structureDefinition.hasSnapshot() && structureDefinition.getDerivation().equals(StructureDefinition.TypeDerivationRule.CONSTRAINT)) {
-                LOG.debug("Missing Snapshot {}", structureDefinition.getUrl());
+                LOG.warn("Missing Snapshot {}", structureDefinition.getUrl());
             }
             myStructureDefinitions.put(structureDefinition.getUrl(),structureDefinition);
         }

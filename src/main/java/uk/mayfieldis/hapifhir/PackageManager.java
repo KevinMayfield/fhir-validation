@@ -2,8 +2,9 @@ package uk.mayfieldis.hapifhir;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.cache.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
-import org.hl7.fhir.utilities.cache.PackageCacheManager;
+
 import org.hl7.fhir.utilities.cache.ToolsVersion;
 
 import java.io.InputStream;
@@ -17,8 +18,8 @@ public class PackageManager {
     public final static NpmPackage getPackage(String packageName, String version, String url) throws Exception {
 
         NpmPackage npm = null;
-        PackageCacheManager pcm= new PackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
-        //FilesystemPackageCacheManager pcm= new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        //.PackageCacheManager pcm= new PackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
+        FilesystemPackageCacheManager pcm= new FilesystemPackageCacheManager(true, ToolsVersion.TOOLS_VERSION);
 
             try {
 
@@ -55,7 +56,7 @@ public class PackageManager {
             return npm;
     }
 
-    private final static NpmPackage getPackageFromUrl(PackageCacheManager pcm, String id, String url, String version) throws Exception {
+    private final static NpmPackage getPackageFromUrl(FilesystemPackageCacheManager pcm, String id, String url, String version) throws Exception {
 
         InputStream stream;
         try {

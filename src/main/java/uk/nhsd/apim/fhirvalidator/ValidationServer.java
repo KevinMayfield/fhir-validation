@@ -28,9 +28,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
-import uk.mayfieldis.hapifhir.validation.NPMConformanceParser;
 import uk.mayfieldis.hapifhir.PackageManager;
-import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
+import uk.mayfieldis.hapifhir.validation.NPMConformanceParser;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 
 import java.util.*;
@@ -168,7 +167,7 @@ public class ValidationServer extends SpringBootServletInitializer {
                 // Use ontoserver
                 // Create a module that uses a remote terminology service
 
-                RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
+                RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
                 remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
          //       RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
          //       remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
@@ -196,34 +195,11 @@ public class ValidationServer extends SpringBootServletInitializer {
             validationSupportChain.addValidationSupport(igValidationSupport);
         }
 
-
-      //  uk.mayfieldis.hapifhir.support.SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new uk.mayfieldis.hapifhir.support.SnapshotGeneratingValidationSupport(ctx);
-      //  validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
-
         SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
         validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
 
-
-        for (IBaseResource resource: validationSupportChain.fetchAllStructureDefinitions()) {
-            if (resource instanceof StructureDefinition) {
-                StructureDefinition structureDefinition = (StructureDefinition) resource;
-                if (!structureDefinition.hasSnapshot()
-                        && structureDefinition.getDerivation() == StructureDefinition.TypeDerivationRule.CONSTRAINT
-                        && structureDefinition.getBaseDefinition().startsWith("http://hl7.org/fhir/")) {
-                    validationSupportChain.generateSnapshot(validationSupportChain,
-                            structureDefinition,
-                            structureDefinition.getUrl(),
-                            "https://fhir.nhs.uk/R4",
-                            structureDefinition.getName());
-                }
-
-            }
-        }
-
-
 // Wrap the chain in a cache to improve performance
         CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
-
 
 
         // We try the above validators first
