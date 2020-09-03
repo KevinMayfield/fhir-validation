@@ -31,6 +31,7 @@ import uk.mayfieldis.hapifhir.FHIRServerProperties;
 import uk.mayfieldis.hapifhir.PackageManager;
 import uk.mayfieldis.hapifhir.validation.NPMConformanceParser;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
+import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
 
 import java.util.*;
 
@@ -167,10 +168,9 @@ public class ValidationServer extends SpringBootServletInitializer {
                 // Use ontoserver
                 // Create a module that uses a remote terminology service
 
-                RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
+                RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
                 remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
-         //       RemoteTerminologyServiceValidationSupport remoteTermSvc = new RemoteTerminologyServiceValidationSupport(ctx);
-         //       remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
+
                 validationSupportChain.addValidationSupport(remoteTermSvc);
             } else {
 
