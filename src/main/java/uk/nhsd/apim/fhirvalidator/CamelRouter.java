@@ -76,6 +76,8 @@ public class CamelRouter extends RouteBuilder {
 
         from("direct:token")
                 .to("log:PRE1?level=INFO&showAll=true")
+                .removeHeaders("*")
+                .setHeader(Exchange.CONTENT_TYPE, simple("application/x-www-form-urlencoded"))
                 .setHeader(Exchange.HTTP_PATH, simple("/oauth2/token"))
                 .to("log:PRE2?level=INFO&showAll=true")
                 .to("https://account.withings.com/?bridgeEndpoint=true")
