@@ -20,6 +20,7 @@
       <phloc_commons_version>4.4.11</phloc_commons_version>
       <ph_schematron_version>5.0.4</ph_schematron_version>
       <jackson_version>2.11.0</jackson_version>
+      <camel-version>3.7.0</camel-version>
   </properties>
 
   <dependencyManagement>
@@ -30,6 +31,11 @@
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot-version}</version>
       </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-spring-boot-dependencies</artifactId>
+            <version>${camel-version}</version>
+        </dependency>
       
     </dependencies>
   </dependencyManagement>
@@ -54,6 +60,47 @@
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-test</artifactId>
           <version>${spring-boot-version}</version>
+          <scope>test</scope>
+      </dependency>
+
+
+      <!-- Camel -->
+
+      <dependency>
+          <groupId>org.apache.camel.springboot</groupId>
+          <artifactId>camel-spring-boot-starter</artifactId>
+          <version>${camel-version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.camel.springboot</groupId>
+          <artifactId>camel-rest-starter</artifactId>
+          <version>${camel-version}</version>
+          <!-- use the same version as your Camel core version -->
+      </dependency>
+      <dependency>
+          <groupId>org.apache.camel.springboot</groupId>
+          <artifactId>camel-jackson-starter</artifactId>
+          <version>${camel-version}</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.apache.camel.springboot</groupId>
+          <artifactId>camel-servlet-starter</artifactId>
+          <version>${camel-version}</version>
+      </dependency>
+
+
+      <dependency>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-http</artifactId>
+          <version>${camel-version}</version>
+      </dependency>
+
+
+      <dependency>
+          <groupId>org.apache.camel</groupId>
+          <artifactId>camel-test-spring</artifactId>
+          <version>${camel-version}</version>
           <scope>test</scope>
       </dependency>
 
@@ -202,6 +249,7 @@
           <artifactId>jackson-module-jaxb-annotations</artifactId>
           <version>${jackson_version}</version>
       </dependency>
+
 
 
   </dependencies>

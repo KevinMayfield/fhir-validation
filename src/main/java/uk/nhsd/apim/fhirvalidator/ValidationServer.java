@@ -6,6 +6,8 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -66,7 +68,23 @@ public class ValidationServer extends SpringBootServletInitializer {
         return Thread.currentThread().getContextClassLoader();
     }
 
+    @Bean
+    CamelContextConfiguration contextConfiguration() {
 
+        return new CamelContextConfiguration() {
+
+            @Override
+            public void beforeApplicationStart(CamelContext camelContext) {
+
+            }
+
+            @Override
+            public void afterApplicationStart(CamelContext camelContext) {
+                // Needs to be overridden - no action required
+
+            }
+        };
+    }
 
 
     @Bean
@@ -232,6 +250,14 @@ public class ValidationServer extends SpringBootServletInitializer {
         return registration;
     }
 
-
+    /*
+    @Bean
+    ServletRegistrationBean servletRegistrationBean() {
+        ServletRegistrationBean servlet = new ServletRegistrationBean
+                (new CamelHttpTransportServlet(), "/services/*");
+        servlet.setName("CamelServlet");
+        return servlet;
+    }
+*/
 }
 //CHECKSTYLE:ON
