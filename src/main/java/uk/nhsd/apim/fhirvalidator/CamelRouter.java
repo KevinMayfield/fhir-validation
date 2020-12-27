@@ -16,6 +16,7 @@
  */
 package uk.nhsd.apim.fhirvalidator;
 
+import ca.uhn.fhir.context.FhirContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpComponent;
@@ -24,6 +25,8 @@ import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.checkerframework.checker.units.qual.C;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -37,25 +40,14 @@ import javax.net.ssl.SSLSocketFactory;
 @Component
 public class CamelRouter extends RouteBuilder {
 
+    @Autowired
+    FhirContext ctx;
 
     @Override
     public void configure() throws Exception {
 
-        /*
-        KeyStoreParameters ksp = new KeyStoreParameters();
-        ksp.setResource("keystore.jks");
-        ksp.setPassword("password");
+        CsvToObservation csvToObservation = new CsvToObservation(this.ctx);
 
-        KeyManagersParameters kmp = new KeyManagersParameters();
-        kmp.setKeyStore(ksp);
-        kmp.setKeyPassword("keyPassword");
-
-        SSLContextParameters scp = new SSLContextParameters();
-        scp.setKeyManagers(kmp);
-
-        HttpComponent httpComponent = getContext().getComponent("https", HttpComponent.class);
-        httpComponent.setSslContextParameters(scp);
-*/
         restConfiguration()
                 .component("servlet")
                 .dataFormatProperty("prettyPrint", "true")
@@ -74,6 +66,10 @@ public class CamelRouter extends RouteBuilder {
                 .post()
                 .to("direct:token");
 
+        rest("/hrv").description("HRV Transform")
+                .post()
+                .to("direct:hrv");
+
         from("direct:token")
                 .to("log:PRE1?level=INFO&showAll=true")
                 .removeHeaders("*")
@@ -82,6 +78,10 @@ public class CamelRouter extends RouteBuilder {
                 .to("log:PRE2?level=INFO&showAll=true")
                 .to("https://account.withings.com/?bridgeEndpoint=true")
                 .to("log:POST?level=INFO&showAll=true");
+
+        from("direct:hrv")
+                .to("log:HRV?level=INFO&showAll=true")
+                .process(csvToObservation);
 
     }
 
