@@ -43,9 +43,15 @@ public class CsvToObservation  implements Processor {
                 String timestamp= record.get("timestamp_measurement");
                 String SDNN = record.get("SDNN");
                 String recovery = record.get("HRV4T_Recovery_Points");
+                String vo2max = "";
+                try {
+                    vo2max = record.get(" vo2max");
+                 //   log.info(vo2max);
+                } catch (Exception ex) {
+                    log.info(ex.getMessage());
+                }
 
                 if (!timestamp.isEmpty() && timestamp.length() > 1 ) {
-                    log.info(timestamp + " - "+ SDNN);
                     Date date =new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
                     if (!SDNN.isEmpty() ) {
                         Observation observation = new Observation();
@@ -80,6 +86,28 @@ public class CsvToObservation  implements Processor {
                                                 .setDisplay("Recovery Points")
                                 ));
                         bundle.addEntry().setResource(observation);
+                    }
+                    if (!vo2max.isBlank() ) {
+
+                        Double value = Double.parseDouble(vo2max);
+                        if (value> 0) {
+                            log.info("vo2max = "+vo2max);
+                            Observation observation = new Observation();
+                            observation.setEffective(new DateTimeType(date));
+                            observation.setValue(new Quantity()
+                                    .setValue(value)
+                                    .setUnit("ml/min")
+                            );
+                            //http://emt.bme.hu/emt/sites/emt.bme.hu.emt/files/HL7-FHIR-ADL-WhitePaper-Concerto.pdf
+                            observation.setCode(
+                                    new CodeableConcept().addCoding(
+                                            new Coding()
+                                                    .setSystem("http://loinc.org")
+                                                    .setCode("60842-2")
+                                                    .setDisplay("Oxygen consumption (VO2)")
+                                    ));
+                            bundle.addEntry().setResource(observation);
+                        }
                     }
                 }
             }
