@@ -1,4 +1,4 @@
-package uk.nhsd.apim.fhirvalidator;
+package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;

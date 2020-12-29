@@ -14,22 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.nhsd.apim.fhirvalidator;
+package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.http.HttpComponent;
-import org.apache.camel.support.jsse.KeyManagersParameters;
-import org.apache.camel.support.jsse.KeyStoreParameters;
-import org.apache.camel.support.jsse.SSLContextParameters;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * A simple Camel route that triggers from a timer and calls a bean and prints to system out.
@@ -46,7 +37,8 @@ public class CamelRouter extends RouteBuilder {
     @Override
     public void configure() throws Exception {
 
-        CsvToObservation csvToObservation = new CsvToObservation(this.ctx);
+        HRVCsvToObservation HRVCsvToObservation = new HRVCsvToObservation(this.ctx);
+        IHealthCsvToObservation iHealthCsvToObservation = new IHealthCsvToObservation(this.ctx);
 
         restConfiguration()
                 .component("servlet")
@@ -70,6 +62,10 @@ public class CamelRouter extends RouteBuilder {
                 .post()
                 .to("direct:hrv");
 
+        rest("/ihealth").description("IHealth SPO2Transform")
+                .post()
+                .to("direct:ihealth");
+
         from("direct:token")
                 .to("log:PRE1?level=INFO&showAll=true")
                 .removeHeaders("*")
@@ -81,7 +77,11 @@ public class CamelRouter extends RouteBuilder {
 
         from("direct:hrv")
                 .to("log:HRV?level=INFO&showAll=true")
-                .process(csvToObservation);
+                .process(HRVCsvToObservation);
+
+        from("direct:ihealth")
+                .to("log:iHealth?level=INFO&showAll=true")
+                .process(iHealthCsvToObservation);
 
     }
 

@@ -1,4 +1,4 @@
-package uk.nhsd.apim.fhirvalidator;
+package uk.mayfieldis.fhirservice;
 
 
 import ca.uhn.fhir.context.FhirContext;
@@ -10,10 +10,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.spring.boot.CamelContextConfiguration;
 import org.hl7.fhir.common.hapi.validation.support.*;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,13 +40,13 @@ import java.util.*;
 @SpringBootApplication(exclude = {
          ElasticsearchAutoConfiguration.class, DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @ServletComponentScan()
-@ComponentScan({"uk.nhsd.apim.fhirvalidator", "uk.mayfieldis.hapifhir"})
-public class ValidationServer extends SpringBootServletInitializer {
+@ComponentScan({"uk.mayfieldis.fhirservice", "uk.mayfieldis.hapifhir"})
+public class SupportServer extends SpringBootServletInitializer {
 
     /**
      * A main method to start this application.
      */
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ValidationServer.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SupportServer.class);
 
     FhirContext ctx;
 
@@ -61,7 +59,7 @@ public class ValidationServer extends SpringBootServletInitializer {
         System.setProperty("management.security.enabled","false");
         System.setProperty("management.contextPath","");
 
-        SpringApplication.run(ValidationServer.class, args);
+        SpringApplication.run(SupportServer.class, args);
     }
 
     private ClassLoader getContextClassLoader() {

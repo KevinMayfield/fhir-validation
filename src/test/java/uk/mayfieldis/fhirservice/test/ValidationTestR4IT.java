@@ -1,4 +1,4 @@
-package uk.nhsd.apim.fhirvalidator.test;
+package uk.mayfieldis.fhirservice.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;

@@ -1,14 +1,12 @@
-package uk.nhsd.apim.fhirvalidator;
+package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.checkerframework.checker.units.qual.C;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
@@ -17,15 +15,15 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class CsvToObservation  implements Processor {
+public class IHealthCsvToObservation implements Processor {
 
     FhirContext ctx = null;
 
-    public CsvToObservation(FhirContext _ctx) {
+    public IHealthCsvToObservation(FhirContext _ctx) {
         this.ctx = _ctx;
     }
 
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CsvToObservation.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IHealthCsvToObservation.class);
 
 
     @Override
@@ -40,74 +38,48 @@ public class CsvToObservation  implements Processor {
             bundle = new Bundle();
             CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(new InputStreamReader((InputStream) body));
             for (CSVRecord record : csvParser) {
-                String timestamp= record.get("timestamp_measurement");
-                String SDNN = record.get("SDNN");
-                String recovery = record.get("HRV4T_Recovery_Points");
-                String vo2max = "";
-                try {
-                    vo2max = record.get(" vo2max");
-                 //   log.info(vo2max);
-                } catch (Exception ex) {
-                    log.info(ex.getMessage());
-                }
+                String timestamp= record.get("Time");
+                String spo2 = record.get("SpO2");
+                String PI = record.get("PI");
+
 
                 if (!timestamp.isEmpty() && timestamp.length() > 1 ) {
                     Date date =new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
-                    if (!SDNN.isEmpty() ) {
+                    if (!spo2.isEmpty() ) {
                         Observation observation = new Observation();
                         observation.setEffective(new DateTimeType(date));
                         observation.setValue(new Quantity()
-                                .setValue(Double.parseDouble(SDNN))
-                                .setUnit("SDNN")
+                                .setValue(Double.parseDouble(spo2.replace("%","")))
+                                .setUnit("%")
                         );
-                        //http://emt.bme.hu/emt/sites/emt.bme.hu.emt/files/HL7-FHIR-ADL-WhitePaper-Concerto.pdf
+
+                        observation.setCode(
+                                new CodeableConcept().addCoding(
+                                        new Coding()
+                                                .setSystem("http://snomed.info/sct")
+                                        .setCode("103228002")
+                                        .setDisplay("Blood oxygen saturation")
+                                ));
+                        observation.addIdentifier(identifer(observation,date));
+                        bundle.addEntry().setResource(observation);
+                    }
+                    if (!PI.isEmpty() ) {
+                        Observation observation = new Observation();
+                        observation.setEffective(new DateTimeType(date));
+                        observation.setValue(new Quantity()
+                                .setValue(Double.parseDouble(PI))
+                                .setUnit("ratio")
+                        );
+
                         observation.setCode(
                                 new CodeableConcept().addCoding(
                                         new Coding()
                                                 .setSystem("http://loinc.org")
-                                        .setCode("8867-4")
-                                        .setDisplay("Pulse variation")
+                                                .setCode("73794-0")
+                                                .setDisplay("Perfusion index Blood Postductal Pulse oximetry")
                                 ));
+                        observation.addIdentifier(identifer(observation,date));
                         bundle.addEntry().setResource(observation);
-                    }
-                    if (!recovery.isEmpty() ) {
-                        Observation observation = new Observation();
-                        observation.setEffective(new DateTimeType(date));
-                        observation.setValue(new Quantity()
-                                .setValue(Double.parseDouble(recovery))
-                                .setUnit("points")
-                        );
-                        //http://emt.bme.hu/emt/sites/emt.bme.hu.emt/files/HL7-FHIR-ADL-WhitePaper-Concerto.pdf
-                        observation.setCode(
-                                new CodeableConcept().addCoding(
-                                        new Coding()
-                                                .setSystem("https://www.hrv4training.com/")
-                                                .setCode("Recovery_Points")
-                                                .setDisplay("Recovery Points")
-                                ));
-                        bundle.addEntry().setResource(observation);
-                    }
-                    if (!vo2max.isBlank() ) {
-
-                        Double value = Double.parseDouble(vo2max);
-                        if (value> 0) {
-                            log.info("vo2max = "+vo2max);
-                            Observation observation = new Observation();
-                            observation.setEffective(new DateTimeType(date));
-                            observation.setValue(new Quantity()
-                                    .setValue(value)
-                                    .setUnit("ml/min")
-                            );
-                            //http://emt.bme.hu/emt/sites/emt.bme.hu.emt/files/HL7-FHIR-ADL-WhitePaper-Concerto.pdf
-                            observation.setCode(
-                                    new CodeableConcept().addCoding(
-                                            new Coding()
-                                                    .setSystem("http://loinc.org")
-                                                    .setCode("60842-2")
-                                                    .setDisplay("Oxygen consumption (VO2)")
-                                    ));
-                            bundle.addEntry().setResource(observation);
-                        }
                     }
                 }
             }
@@ -134,4 +106,9 @@ public class CsvToObservation  implements Processor {
         exchange.getIn().setBody(ctx.newJsonParser().encodeResourceToString(bundle));
     }
 
+    private Identifier identifer(Observation observation, Date date) {
+        return new Identifier()
+                .setSystem("https://ihealthlabs.eu/Id")
+                .setValue(observation.getCode().getCodingFirstRep().getCode() + "-"+ Long.toString(date.getTime()) );
+    }
 }
