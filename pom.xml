@@ -261,7 +261,7 @@
   </dependencies>
 
   <build>
-      <finalName>fhir-validator</finalName>
+      <finalName>fhir-service</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
