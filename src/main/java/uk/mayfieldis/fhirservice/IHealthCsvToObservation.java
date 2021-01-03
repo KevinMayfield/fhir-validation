@@ -2,6 +2,7 @@ package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.google.common.io.CharStreams;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.csv.CSVFormat;
@@ -10,8 +11,11 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -36,13 +40,38 @@ public class IHealthCsvToObservation implements Processor {
         if (body instanceof InputStream) {
             log.info("InputStream");
             bundle = new Bundle();
-            CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(new InputStreamReader((InputStream) body));
-            for (CSVRecord record : csvParser) {
-                String timestamp= record.get("Time");
+            CSVParser csvParser = null;
+
+            csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(new InputStreamReader((InputStream) body));
+
+            if (csvParser.getHeaderMap().size() < 2) {
+                InputStream inputStream = (InputStream) body;
+                inputStream.reset();
+                Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_16);
+                csvParser = new CSVParser(reader, CSVFormat.TDF.withFirstRecordAsHeader());
+            }
+            log.info(csvParser.getHeaderMap().toString());
+            for (CSVRecord record : csvParser.getRecords()) {
+                log.info("Records");
+                String timestamp = record.get("Time");
                 String spo2 = record.get("SpO2");
-                String PI = record.get("PI");
+                String PI = "";
+                try {
+                    PI = record.get("PI");
+                } catch (Exception ex) {
+                    // No Pie
+                }
+                String dateStr= "";
+                try {
+                    dateStr = record.get("Date");
+                } catch (Exception ex) {
+                    // No Pie
+                }
+                if (!dateStr.isEmpty() && !timestamp.isEmpty()) {
+                    timestamp = dateStr + " " + timestamp + ":00";
 
-
+                }
+                log.info(timestamp);
                 if (!timestamp.isEmpty() && timestamp.length() > 1 ) {
                     Date date =new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
                     if (!spo2.isEmpty() ) {
