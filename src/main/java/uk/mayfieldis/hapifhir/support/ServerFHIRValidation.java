@@ -5,12 +5,12 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.*;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class ServerFHIRValidation {
     List<MessageDefinition> messageDefinitions = null;
     FhirContext ctx;
 
-  //  PackageCacheManager pcm;
+
     NpmPackage serverIgPackage;
 
     private static final Logger log = LoggerFactory.getLogger(ServerFHIRValidation.class);
@@ -60,11 +60,13 @@ public class ServerFHIRValidation {
 
                     MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
                     messageDefinitions.add(messageDefinition);
+                    log.info("MesageDefinition: {}",messageDefinition.getUrl() );
                 }
                 for (String uri : serverIgPackage.list("package/examples")) {
                     if (uri.startsWith("MessageDefinition")) {
                         MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package/examples", uri));
                         messageDefinitions.add(messageDefinition);
+                        log.info("MesageDefinition: {}",messageDefinition.getUrl() );
                     }
                 }
                 // For windows .... !!!
@@ -72,6 +74,7 @@ public class ServerFHIRValidation {
                     if (uri.startsWith("MessageDefinition")) {
                         MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package\\examples", uri));
                         messageDefinitions.add(messageDefinition);
+                        log.info("MesageDefinition: {}",messageDefinition.getUrl() );
                     }
                 }
             } catch  (IOException ioex) {
@@ -96,9 +99,6 @@ public class ServerFHIRValidation {
             if (var8 instanceof BaseServerResponseException) {
                 throw (BaseServerResponseException)var8;
             }
-            if (var8 instanceof IllegalArgumentException && var8.getCause() != null) {
-                throw new UnprocessableEntityException(var8.getCause().getMessage());
-            }
 
             throw new InternalErrorException(var8);
         }
@@ -109,12 +109,25 @@ public class ServerFHIRValidation {
             SingleValidationMessage next11 = (SingleValidationMessage)var11.next();
 
             if (next11.getMessage().contains("Observation obs-7")) continue;
+            if (!FHIRServerProperties.getValidateTerminologyEnabled() &&  next11.getMessage().contains("The Coding provided is not in the value set")) continue;
+            if (next11.getMessage().contains("https://fhir.nhs.uk/ValueSet/UKCore-MedicationCode")
+                    || next11.getMessage().contains("https://fhir.nhs.uk/ValueSet/DM-MedicationRequest-Code")
+                    || next11.getMessage().contains("https://fhir.nhs.uk/ValueSet/DM-MedicationDispense-Code")
+                    || next11.getMessage().contains("http://hl7.org/fhir/ValueSet/units-of-time")
+                    || next11.getMessage().contains("https://fhir.nhs.uk/R4/ValueSet/UKCore-MedicationDosageRoute")
+                   // || next11.getMessage().contains("StructureDefinition has no snapshot")
+            ) {
+                // Unable to verify so set to low warning
+                next11.setSeverity(ResultSeverityEnum.INFORMATION);
+            }
             if (next11.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()) {
+                log.error(next11.getMessage());
                 throw new UnprocessableEntityException(ctx, validationResult.toOperationOutcome());
             } else {
                 log.info(next11.getMessage());
             }
         }
+
         return validationResult;
     }
 
@@ -171,6 +184,7 @@ public class ServerFHIRValidation {
     }
 
     private MessageDefinition getMessageDefinition(String system, String code) {
+
         for (MessageDefinition messageDefinition : this.messageDefinitions) {
             if (messageDefinition.getEventCoding().getCode().equals(code)
                     && messageDefinition.getEventCoding().getSystem().equals(system)) {

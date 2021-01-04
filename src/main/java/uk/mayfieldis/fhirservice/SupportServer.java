@@ -164,7 +164,60 @@ public class SupportServer extends SpringBootServletInitializer {
                                                         @Qualifier("core3IgPackage") NpmPackage validation3IgPackage,
                                                         @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
 
+        ValidationSupportChain
+                validationSupportChain = new ValidationSupportChain();
 
+
+        DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(r4ctx);
+        validationSupportChain.addValidationSupport(defaultProfileValidationSupport);
+
+        // Ideally Terminology Server needs to run first to provide code validation
+        if (FHIRServerProperties.getValidateTerminologyEnabled() && !FHIRServerProperties.getTerminologyServer().isEmpty()) {
+            log.info("Remote Terminology Support");
+            validationSupportChain.addValidationSupport(new RemoteTerminologyServiceValidationSupportOnto(r4ctx));
+        } else {
+            log.info("In memory Terminology Support");
+            validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
+        }
+        validationSupportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(r4ctx));
+
+        if (validationIgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport= NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validationIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+
+        }
+        if (validation2IgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation2IgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+
+        }
+        if (validation3IgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation3IgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+        }
+        if (serverIgPackage !=null) {
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, serverIgPackage);
+            validationSupportChain.addValidationSupport(igValidationSupport);
+        }
+
+        /*
+        IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
+        defaultProfileValidationSupport.createSnapshots(context,validationSupportChain);
+*/
+        // We try the above validators first
+
+        val.setValidateAgainstStandardSchema(FHIRServerProperties.getValidationSchemaFlag());
+
+        val.setValidateAgainstStandardSchematron(FHIRServerProperties.getValidationSchemaFlag());
+
+        FhirInstanceValidator instanceValidator = new FhirInstanceValidator(r4ctx);
+        val.registerValidatorModule(instanceValidator);
+
+        instanceValidator.setValidationSupport(validationSupportChain);
+
+        return instanceValidator;
+
+        /*
         ValidationSupportChain
                 validationSupportChain = new ValidationSupportChain();
 
@@ -192,24 +245,6 @@ public class SupportServer extends SpringBootServletInitializer {
 
             }
         }
-        if (validationIgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport= NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validationIgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-
-        }
-        if (validation2IgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation2IgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-
-        }
-        if (validation3IgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation3IgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-        }
-        if (serverIgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, serverIgPackage);
-            validationSupportChain.addValidationSupport(igValidationSupport);
-        }
 
         SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
         validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
@@ -232,6 +267,8 @@ public class SupportServer extends SpringBootServletInitializer {
 
 
         return instanceValidator;
+
+         */
     }
 
 

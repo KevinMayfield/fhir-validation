@@ -1,4 +1,4 @@
-package uk.mayfieldis.fhirservice;
+package uk.mayfieldis.fhirservice.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;

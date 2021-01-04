@@ -1,8 +1,7 @@
-package uk.mayfieldis.fhirservice;
+package uk.mayfieldis.fhirservice.processor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import com.google.common.io.CharStreams;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.csv.CSVFormat;
@@ -11,7 +10,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;

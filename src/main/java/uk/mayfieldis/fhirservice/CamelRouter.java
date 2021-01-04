@@ -17,10 +17,14 @@
 package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import uk.mayfieldis.fhirservice.processor.*;
+import uk.mayfieldis.hapifhir.FHIRServerProperties;
+import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 
 /**
  * A simple Camel route that triggers from a timer and calls a bean and prints to system out.
@@ -31,14 +35,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class CamelRouter extends RouteBuilder {
 
+    static final String FHIR_VALIDATION = "direct:FHIR-Validation";
+
     @Autowired
     FhirContext ctx;
+
+    @Autowired
+    ServerFHIRValidation serverFHIRValidation;
 
     @Override
     public void configure() throws Exception {
 
         HRVCsvToObservation HRVCsvToObservation = new HRVCsvToObservation(this.ctx);
         IHealthCsvToObservation iHealthCsvToObservation = new IHealthCsvToObservation(this.ctx);
+        MessageSent messageSent = new MessageSent(ctx);
+
+        FHIRValidation validation = new FHIRValidation(this.ctx, this.serverFHIRValidation);
+        FHIRMessageToTransaction
+                fhirMessageToTransaction = new FHIRMessageToTransaction(ctx);
+        FhirException fhirException = new FhirException();
+        FHIRResponse fhirResponse = new FHIRResponse(ctx);
+
+        onException(BaseServerResponseException.class)
+                .to("log:BaseError?level=ERROR&showAll=true")
+                .handled(true)
+                .process(fhirException)
+                .process(fhirResponse);
+
+        /*
+
+            REST api AND config
+
+         */
 
         restConfiguration()
                 .component("servlet")
@@ -82,6 +110,29 @@ public class CamelRouter extends RouteBuilder {
         from("direct:ihealth")
                 .to("log:iHealth?level=INFO&showAll=true")
                 .process(iHealthCsvToObservation);
+
+
+        /*
+
+        FHIR Server interactions
+
+         */
+        from("direct:processMessage")
+                .routeId("HAPI-ProcessMessage")
+                .to(FHIR_VALIDATION)
+                .process(messageSent); // Create success operationOutcome message
+
+        from(FHIR_VALIDATION)
+                .routeId("FHIR-Validation")
+                .setHeader(Exchange.HTTP_PATH,constant(""))
+                .process(validation)
+                .process(fhirMessageToTransaction)
+                .to("log:TX-FHIR-Server?level=INFO&showAll=true")
+             //   .to("file:OUTTX") // debugging
+                .onException(BaseServerResponseException.class).to("log:ERR-Retry?level=ERROR&showAll=true")
+                .useOriginalMessage()
+                .maximumRedeliveries(2).redeliveryDelay(500).handled(false).end()
+                .to(FHIRServerProperties.getFHIRServer());
 
     }
 

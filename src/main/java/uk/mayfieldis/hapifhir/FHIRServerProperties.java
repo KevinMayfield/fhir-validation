@@ -97,6 +97,7 @@ public class FHIRServerProperties {
     static final String TERMINOLOGY_VALIDATION_FLAG = "terminology.validation.flag";
     static final String TERMINOLOGY_SERVER = "terminology.server";
 
+    static final String FHIR_SERVER = "fhir.server";
 
     private static Properties properties;
 
@@ -535,6 +536,10 @@ public class FHIRServerProperties {
 
     public static Boolean getLoggerLogExceptions() {
         return FHIRServerProperties.getPropertyBoolean(LOGGER_LOG_EXCEPTIONS, true);
+    }
+
+    public static String getFHIRServer() {
+        return FHIRServerProperties.getProperty(FHIR_SERVER, "direct:FHIRServer");
     }
 
 }

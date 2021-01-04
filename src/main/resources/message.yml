@@ -1,25 +1,40 @@
 
 Patient:
-  ADT:
-     - A28
-     - A31
+  unsolicited-observation: update
 
 Encounter:
-  patient-referral: update
-
+  unsolicited-observation: update
 
 DiagnosticReport:
-  patient-referral: update
-  ORU:
-    - R01
+  unsolicited-observation: update
+
+MedicationRequest:
+  prescription-order: update
+  prescription-order-update: update
 
 Observation:
-  patient-referral: update
-  ORU:
-    - R01
+  unsolicited-observation: update
 
 ServiceRequest:
   patient-referral: update
 
 QuestionnaireResponse:
   patient-referral: update
+
+Provenance:
+  prescription-order: update
+
+MedicationDispense:
+  prescription-order: update
+  prescription-dispense: update
+  prescription-order-update: update
+
+Organization:
+  prescription-order: update
+  prescription-dispense: update
+  prescription-order-update: update
+
+HealthcareService:
+  prescription-order: update
+  prescription-dispense: update
+  prescription-order-update: update
