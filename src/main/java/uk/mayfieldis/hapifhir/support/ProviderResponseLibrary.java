@@ -4,9 +4,12 @@ package uk.mayfieldis.hapifhir.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.camel.http.base.HttpOperationFailedException;
 import org.apache.http.conn.HttpHostConnectException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,16 +24,25 @@ public class ProviderResponseLibrary {
     }
 
 
-    public static void handleException(Exception ex) throws Exception {
+    public static void handleException(FhirContext ctx, Exception ex) throws Exception {
 
-     /*   if (ex instanceof HttpO) {
+       if (ex instanceof HttpOperationFailedException) {
             HttpOperationFailedException httpex = (HttpOperationFailedException) ex;
             if (httpex.getResponseBody() != null) {
-                throw new UnprocessableEntityException(httpex.getResponseBody());
+                String errorMessage = httpex.getResponseBody();
+                try {
+                    IBaseResource resource = ctx.newJsonParser().parseResource(httpex.getResponseBody());
+                    if (resource instanceof OperationOutcome) {
+                        errorMessage = ((OperationOutcome) resource).getIssueFirstRep().getDiagnostics();
+                    }
+                } catch (Exception ex1) {
+
+                }
+                throw new UnprocessableEntityException(errorMessage);
             } else {
                 throw new UnprocessableEntityException(httpex.getMessage());
             }
-        } else */
+        } else
             if (ex instanceof HttpHostConnectException) {
             throw new InternalErrorException("Unable to connect to Server");
         } else {

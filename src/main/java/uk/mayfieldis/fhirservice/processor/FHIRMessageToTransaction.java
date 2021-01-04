@@ -6,7 +6,12 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
+import org.springframework.util.ReflectionUtils;
 import uk.mayfieldis.fhirservice.MessageConfig;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.UUID;
 
 public class FHIRMessageToTransaction implements Processor {
 
@@ -45,10 +50,13 @@ public class FHIRMessageToTransaction implements Processor {
         if (messageHeader == null) {
             throw new UnprocessableEntityException("Missing MessageHeader");
         }
+        Bundle newBundle = new Bundle();
         for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
 
 
             String conditionalUrl = getConditional(entry.getResource());
+           // inspect(entry.getResource().getClass());
+            analyze(newBundle, entry.getResource());
             if (conditionalUrl !=null && !conditionalUrl.isEmpty()) {
                 if (MessageConfig.doUpdate(entry.getResource().getClass().getSimpleName(),messageHeader.getEventCoding().getCode())) {
                     // Always update, default is to create
@@ -67,8 +75,66 @@ public class FHIRMessageToTransaction implements Processor {
                         .setUrl(entry.getResource().getClass().getSimpleName());
             }
         }
+        // Add in any newly created entries
+        for (Bundle.BundleEntryComponent entry : newBundle.getEntry()) {
+            bundle.addEntry(entry);
+        }
 
         exchange.getIn().setBody(ctx.newJsonParser().encodeResourceToString(bundle));
+    }
+
+
+    public void analyze(Bundle bundle, Object obj){
+        ReflectionUtils.doWithFields(obj.getClass(), field -> {
+
+          //  System.out.println("Field name: " + field.getName());
+            field.setAccessible(true);
+         //   System.out.println("Field value: "+ field.get(obj));
+            if (field.get(obj) instanceof Reference) {
+                Reference reference = (Reference) field.get(obj);
+                if (reference.hasIdentifier()) {
+                    System.out.println(reference.getIdentifier().getSystem() + " - " + reference.getIdentifier().getValue());
+                    if (reference.getIdentifier().getSystem().equals("https://fhir.nhs.uk/Id/nhs-number") && !reference.hasReference()) {
+                        Patient patient = new Patient();
+                        patient.addIdentifier(reference.getIdentifier());
+                        Bundle.BundleEntryComponent entry = bundle.addEntry();
+                        entry.setResource(patient);
+                        UUID uuid = UUID.randomUUID();
+                        entry.setFullUrl("urn:uuid:"+uuid);
+                        entry.getRequest()
+                                .setMethod(Bundle.HTTPVerb.POST)
+                                .setUrl(patient.getClass().getSimpleName())
+                                .setIfNoneExist(patient.getClass().getSimpleName() + "?" + getConditional(patient));
+                        reference.setReference("urn:uuid:"+uuid);
+                    }
+                    if (reference.getIdentifier().getSystem().equals("https://fhir.nhs.uk/Id/ods-organization-code") && !reference.hasReference()) {
+                        Organization organization = new Organization();
+                        organization.addIdentifier(reference.getIdentifier());
+                        Bundle.BundleEntryComponent entry = bundle.addEntry();
+                        entry.setResource(organization);
+                        UUID uuid = UUID.randomUUID();
+                        entry.setFullUrl("urn:uuid:"+uuid);
+                        entry.getRequest()
+                                .setMethod(Bundle.HTTPVerb.POST)
+                                .setUrl(organization.getClass().getSimpleName())
+                                .setIfNoneExist(organization.getClass().getSimpleName() + "?" + getConditional(organization));
+                        reference.setReference("urn:uuid:"+uuid);
+                    }
+                }
+            }
+        });
+    }
+
+    static <T> void inspect(Class<T> klazz) {
+        Field[] fields = klazz.getDeclaredFields();
+        System.out.printf("%d fields:%n", fields.length);
+        for (Field field : fields) {
+            System.out.printf("%s %s %s%n",
+                    Modifier.toString(field.getModifiers()),
+                    field.getType().getSimpleName(),
+                    field.getName()
+            );
+        }
     }
 
     private String getConditional(Resource resource) {

@@ -20,6 +20,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.http.base.HttpOperationFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.mayfieldis.fhirservice.processor.*;
@@ -56,7 +57,7 @@ public class CamelRouter extends RouteBuilder {
         FhirException fhirException = new FhirException();
         FHIRResponse fhirResponse = new FHIRResponse(ctx);
 
-        onException(BaseServerResponseException.class)
+        onException(HttpOperationFailedException.class)
                 .to("log:BaseError?level=ERROR&showAll=true")
                 .handled(true)
                 .process(fhirException)
@@ -127,13 +128,11 @@ public class CamelRouter extends RouteBuilder {
                 .setHeader(Exchange.HTTP_PATH,constant(""))
                 .process(validation)
                 .process(fhirMessageToTransaction)
-                .to("log:TX-FHIR-Server?level=INFO&showAll=true")
+                .to("log:TX-FHIR-Server?level=INFO")
              //   .to("file:OUTTX") // debugging
-                .onException(BaseServerResponseException.class).to("log:ERR-Retry?level=ERROR&showAll=true")
-                .useOriginalMessage()
+                .onException(HttpOperationFailedException.class).to("log:ERR-Retry?level=ERROR&showException=true&showBody=false")
                 .maximumRedeliveries(2).redeliveryDelay(500).handled(false).end()
                 .to(FHIRServerProperties.getFHIRServer());
-
     }
 
 }

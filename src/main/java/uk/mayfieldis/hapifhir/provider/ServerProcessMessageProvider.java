@@ -82,7 +82,7 @@ public class ServerProcessMessageProvider {
                 }
             });
             if (exchange.getException() != null) {
-                ProviderResponseLibrary.handleException(exchange.getException());
+                ProviderResponseLibrary.handleException(ctx, exchange.getException());
             }
 
              IBaseResource baseresource = null;
@@ -109,7 +109,7 @@ public class ServerProcessMessageProvider {
         // HAPI Exceptions pass through
             throw srv;
         } catch(Exception ex) {
-            ProviderResponseLibrary.handleException(ex);
+            ProviderResponseLibrary.handleException(ctx, ex);
         }
         return null;
     }
