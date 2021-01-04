@@ -89,7 +89,11 @@ public class FHIRMessageToTransaction implements Processor {
 
           //  System.out.println("Field name: " + field.getName());
             field.setAccessible(true);
-         //   System.out.println("Field value: "+ field.get(obj));
+        /*
+            if (field.get(obj) instanceof Identifier) {
+                Identifier identifier = (Identifier) field.get(obj);
+                System.out.println(identifier.getSystem() + " - " + identifier.getValue());
+            } */
             if (field.get(obj) instanceof Reference) {
                 Reference reference = (Reference) field.get(obj);
                 if (reference.hasIdentifier()) {
@@ -125,17 +129,6 @@ public class FHIRMessageToTransaction implements Processor {
         });
     }
 
-    static <T> void inspect(Class<T> klazz) {
-        Field[] fields = klazz.getDeclaredFields();
-        System.out.printf("%d fields:%n", fields.length);
-        for (Field field : fields) {
-            System.out.printf("%s %s %s%n",
-                    Modifier.toString(field.getModifiers()),
-                    field.getType().getSimpleName(),
-                    field.getName()
-            );
-        }
-    }
 
     private String getConditional(Resource resource) {
         String result = null;
