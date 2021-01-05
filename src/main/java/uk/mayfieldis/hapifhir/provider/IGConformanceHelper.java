@@ -76,6 +76,23 @@ public class IGConformanceHelper {
                     processResourceComponent(igcomponent);
                     processOperationComponent(igcomponent);
                 }
+                for (CapabilityStatement.CapabilityStatementRestComponent  restComponent: igcapabilityStatement.getRest()) {
+                    for (CapabilityStatement.CapabilityStatementRestResourceComponent restResource :restComponent.getResource()) {
+                        if (capabilityStatement.getRest().size() == 0) {
+                            capabilityStatement.addRest();
+                        }
+                        AtomicReference<Boolean> fd = new AtomicReference<>(false);
+                        capabilityStatement.getRestFirstRep().getResource().forEach( existing -> {
+                            if (existing.getType().equals(restResource.getType())) {
+                                existing.setProfile(restResource.getProfile());
+                                fd.set(true);
+                            }
+                        });
+                        if (!fd.get() ) {
+                            capabilityStatement.getRestFirstRep().addResource(restResource);
+                        }
+                    }
+                }
                 for (CapabilityStatement.CapabilityStatementMessagingComponent messagingComponent : igcapabilityStatement.getMessaging()) {
                     for (CapabilityStatement.CapabilityStatementMessagingSupportedMessageComponent message :messagingComponent.getSupportedMessage()) {
                         if (capabilityStatement.getMessaging().size() == 0) {
