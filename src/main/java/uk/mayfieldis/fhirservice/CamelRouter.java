@@ -95,6 +95,19 @@ public class CamelRouter extends RouteBuilder {
                 .post()
                 .to("direct:ihealth");
 
+        rest("/ihealth/token").description("IHealth Token")
+                .post()
+                .to("direct:ihealthtoken");
+
+        from("direct:ihealthtoken")
+                .to("log:PRE1?level=INFO&showAll=true")
+              //  .removeHeaders("*")
+                .setHeader(Exchange.HTTP_PATH, simple("/OpenApiV2/OAuthv2/userauthorization/"))
+                .setHeader(Exchange.HTTP_METHOD, simple("POST"))
+                .to("log:PRE2?level=INFO&showAll=true")
+                .to("https://openapi.ihealthlabs.eu/?bridgeEndpoint=true")
+                .to("log:POST?level=INFO&showAll=true");
+
         from("direct:token")
                 .to("log:PRE1?level=INFO&showAll=true")
                 .removeHeaders("*")
