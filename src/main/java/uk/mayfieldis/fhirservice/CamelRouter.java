@@ -20,12 +20,20 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.http.HttpComponent;
 import org.apache.camel.http.base.HttpOperationFailedException;
+import org.apache.camel.support.jsse.KeyStoreParameters;
+import org.apache.camel.support.jsse.SSLContextParameters;
+import org.apache.camel.support.jsse.TrustManagersParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.mayfieldis.fhirservice.processor.*;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
+
+import javax.net.ssl.KeyManagerFactory;
+import java.io.InputStream;
+import java.security.KeyStore;
 
 /**
  * A simple Camel route that triggers from a timer and calls a bean and prints to system out.
@@ -46,6 +54,10 @@ public class CamelRouter extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+
+        // https://stackoverflow.com/questions/5706166/apache-camel-http-and-ssl
+
+       // configureSslForHttp();
 
         HRVCsvToObservation HRVCsvToObservation = new HRVCsvToObservation(this.ctx);
         IHealthCsvToObservation iHealthCsvToObservation = new IHealthCsvToObservation(this.ctx);
@@ -146,6 +158,45 @@ public class CamelRouter extends RouteBuilder {
                 .onException(HttpOperationFailedException.class).to("log:ERR-Retry?level=ERROR&showException=true&showBody=false")
                 .maximumRedeliveries(2).redeliveryDelay(500).handled(false).end()
                 .to(FHIRServerProperties.getFHIRServer());
+    }
+
+    private void configureSslForHttp()
+    {
+
+        InputStream keyStoreStream = this.getClass().getClassLoader().getResourceAsStream("bob.jks");
+
+        try {
+
+            /*
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            String keyPassword = "1qaz1qaz";
+
+            keyStore.load(keyStoreStream, keyPassword.toCharArray());
+            kmf.init(keyStore, keyPassword.toCharArray());
+*/
+
+            KeyStoreParameters trust_ksp = new KeyStoreParameters();
+            trust_ksp.setResource("bob.jks");
+            trust_ksp.setPassword("1qaz1qaz");
+            TrustManagersParameters trustp = new TrustManagersParameters();
+
+            trustp.setKeyStore(trust_ksp);
+
+            SSLContextParameters scp = new SSLContextParameters();
+            scp.setTrustManagers(trustp);
+
+            HttpComponent httpComponent = getContext().getComponent("https", HttpComponent.class);
+            httpComponent.setSslContextParameters(scp);
+        } catch (Exception ex) {
+            log.error(ex.getMessage());
+        }
+        /*
+        KeyStoreParameters trust_ksp = new KeyStoreParameters();
+        trust_ksp.setResource("bob.jks");
+        trust_ksp.setPassword("1qaz1qaz");
+*/
+
     }
 
 }
