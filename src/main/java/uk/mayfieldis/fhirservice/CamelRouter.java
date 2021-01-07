@@ -22,9 +22,12 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpComponent;
 import org.apache.camel.http.base.HttpOperationFailedException;
+import org.apache.camel.support.jsse.KeyManagersParameters;
 import org.apache.camel.support.jsse.KeyStoreParameters;
 import org.apache.camel.support.jsse.SSLContextParameters;
 import org.apache.camel.support.jsse.TrustManagersParameters;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.mayfieldis.fhirservice.processor.*;
@@ -32,6 +35,8 @@ import uk.mayfieldis.hapifhir.FHIRServerProperties;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
 
@@ -57,7 +62,7 @@ public class CamelRouter extends RouteBuilder {
 
         // https://stackoverflow.com/questions/5706166/apache-camel-http-and-ssl
 
-       // configureSslForHttp();
+        configureSslForHttp();
 
         HRVCsvToObservation HRVCsvToObservation = new HRVCsvToObservation(this.ctx);
         IHealthCsvToObservation iHealthCsvToObservation = new IHealthCsvToObservation(this.ctx);
@@ -162,40 +167,59 @@ public class CamelRouter extends RouteBuilder {
 
     private void configureSslForHttp()
     {
+        // dev
+        String certPassword = "GzbfAByL";
+        String certFile = "idscertificate-dev.p12";
 
-        InputStream keyStoreStream = this.getClass().getClassLoader().getResourceAsStream("bob.jks");
-
+        String keyPassword = "1qaz1qaz";
+        String keyFile="bob.jks";
         try {
 
+
             /*
+            InputStream keyStoreStream = this.getClass().getClassLoader().getResourceAsStream(certFile);
+
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            String keyPassword = "1qaz1qaz";
 
             keyStore.load(keyStoreStream, keyPassword.toCharArray());
             kmf.init(keyStore, keyPassword.toCharArray());
-*/
+            log.info("Certificate Loaded");
 
-            KeyStoreParameters trust_ksp = new KeyStoreParameters();
-            trust_ksp.setResource("bob.jks");
-            trust_ksp.setPassword("1qaz1qaz");
-            TrustManagersParameters trustp = new TrustManagersParameters();
+            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
 
-            trustp.setKeyStore(trust_ksp);
+            // init the trust manager factory by read certificates
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+
+            // 3. init the SSLContext using kmf and tmf above
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            SSLContext.setDefault(sslContext);
+
+           */
+
+
+            KeyStoreParameters ksp = new KeyStoreParameters();
+            ksp.setResource(keyFile);
+            ksp.setPassword(keyPassword);
+
+            KeyManagersParameters kmp = new KeyManagersParameters();
+            kmp.setKeyStore(ksp);
+            kmp.setKeyPassword(keyPassword);
 
             SSLContextParameters scp = new SSLContextParameters();
-            scp.setTrustManagers(trustp);
+            scp.setKeyManagers(kmp);
 
             HttpComponent httpComponent = getContext().getComponent("https", HttpComponent.class);
             httpComponent.setSslContextParameters(scp);
+
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+           ex.printStackTrace();
+           log.error("SSL "+ ex.getMessage());
         }
-        /*
-        KeyStoreParameters trust_ksp = new KeyStoreParameters();
-        trust_ksp.setResource("bob.jks");
-        trust_ksp.setPassword("1qaz1qaz");
-*/
+
 
     }
 

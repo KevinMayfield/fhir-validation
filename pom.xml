@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.mayfieldis</groupId>
   <artifactId>fhir-service</artifactId>
-  <version>5.1.1-SNAPSHOT</version>
+  <version>5.1.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>fhir-service</name>
@@ -95,7 +95,6 @@
           <artifactId>camel-http</artifactId>
           <version>${camel-version}</version>
       </dependency>
-
 
       <dependency>
           <groupId>org.apache.camel</groupId>
