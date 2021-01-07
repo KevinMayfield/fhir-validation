@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 import uk.mayfieldis.fhirservice.MessageConfig;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.UUID;
 
 public class FHIRMessageToTransaction implements Processor {
@@ -57,8 +58,49 @@ public class FHIRMessageToTransaction implements Processor {
             throw new UnprocessableEntityException("Missing MessageHeader");
         }
 
+        Task task = null;
         for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
 
+            if (entry.getResource() instanceof MedicationRequest) {
+                MedicationRequest medicationRequest = (MedicationRequest) entry.getResource();
+                if (task == null) {
+                    task = new Task();
+                    if (medicationRequest.hasGroupIdentifier())
+                        task.setGroupIdentifier(medicationRequest.getGroupIdentifier());
+
+                    switch (medicationRequest.getStatus()) {
+                        case ACTIVE:
+                            task.setStatus(Task.TaskStatus.REQUESTED);
+                            break;
+                        case CANCELLED:
+                            task.setStatus(Task.TaskStatus.CANCELLED);
+                            break;
+                    }
+                    task.setAuthoredOn(new Date());
+                    if (medicationRequest.hasRequester()) {
+                        task.setRequester(medicationRequest.getRequester());
+                    }
+                    if (medicationRequest.hasDispenseRequest() && medicationRequest.getDispenseRequest().hasPerformer()) {
+                        task.setOwner(medicationRequest.getDispenseRequest().getPerformer());
+                    }
+                    if (medicationRequest.hasStatusReason()) {
+                        task.setStatusReason(medicationRequest.getStatusReason());
+                    }
+                }
+                if (medicationRequest.hasIdentifier()) {
+                    task.addInput().setValue(new Reference().setIdentifier(medicationRequest.getIdentifierFirstRep()));
+                }
+            }
+
+        }
+        if (task != null) {
+            Bundle.BundleEntryComponent entry = bundle.addEntry();
+            entry.setResource(task);
+            UUID uuid = UUID.randomUUID();
+            entry.setFullUrl("urn:uuid:"+uuid);
+        }
+
+        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
 
             String conditionalUrl = getConditional(entry.getResource());
            // inspect(entry.getResource().getClass());
@@ -94,7 +136,10 @@ public class FHIRMessageToTransaction implements Processor {
         ReflectionUtils.doWithFields(obj.getClass(), field -> {
 
             field.setAccessible(true);
-
+            if (field.get(obj) instanceof BackboneElement) {
+                log.info("Backbone detected");
+                analyze(field.get(obj));
+            }
             if (field.get(obj) instanceof Reference) {
                 Reference reference = (Reference) field.get(obj);
                 if (reference.hasIdentifier()) {

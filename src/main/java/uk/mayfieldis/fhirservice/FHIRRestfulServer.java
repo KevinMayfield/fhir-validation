@@ -13,6 +13,7 @@ import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.cors.CorsConfiguration;
+import uk.mayfieldis.fhirservice.provider.TaskProvider;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
 import uk.mayfieldis.hapifhir.interceptor.oauth2.OAuth2Interceptor;
 import uk.mayfieldis.hapifhir.provider.ServerPlainProvider;
@@ -77,6 +78,7 @@ public class FHIRRestfulServer extends RestfulServer {
 		plainProviders.add(applicationContext.getBean(ServerValidationProvider.class));
 		plainProviders.add(applicationContext.getBean(ServerPlainProvider.class));
 		plainProviders.add(applicationContext.getBean(ServerProcessMessageProvider.class));
+		plainProviders.add(applicationContext.getBean(TaskProvider.class));
 
 		registerProviders(plainProviders);
 

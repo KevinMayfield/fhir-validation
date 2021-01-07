@@ -62,7 +62,7 @@ public class CamelRouter extends RouteBuilder {
 
         // https://stackoverflow.com/questions/5706166/apache-camel-http-and-ssl
 
-        configureSslForHttp();
+
 
         HRVCsvToObservation HRVCsvToObservation = new HRVCsvToObservation(this.ctx);
         IHealthCsvToObservation iHealthCsvToObservation = new IHealthCsvToObservation(this.ctx);
@@ -73,6 +73,7 @@ public class CamelRouter extends RouteBuilder {
                 fhirMessageToTransaction = new FHIRMessageToTransaction(ctx);
         FhirException fhirException = new FhirException();
         FHIRResponse fhirResponse = new FHIRResponse(ctx);
+        iHealthConnect iHealthConnect = new iHealthConnect(configureSslForHttp());
 
         onException(HttpOperationFailedException.class)
                 .to("log:BaseError?level=ERROR&showAll=true")
@@ -122,7 +123,8 @@ public class CamelRouter extends RouteBuilder {
                 .setHeader(Exchange.HTTP_PATH, simple("/OpenApiV2/OAuthv2/userauthorization/"))
                 .setHeader(Exchange.HTTP_METHOD, simple("POST"))
                 .to("log:PRE2?level=INFO&showAll=true")
-                .to("https://openapi.ihealthlabs.eu/?bridgeEndpoint=true")
+                .process(iHealthConnect)
+                //.to("https://openapi.ihealthlabs.eu/?bridgeEndpoint=true")
                 .to("log:POST?level=INFO&showAll=true");
 
         from("direct:token")
@@ -159,13 +161,13 @@ public class CamelRouter extends RouteBuilder {
                 .process(validation)
                 .process(fhirMessageToTransaction)
                 .to("log:TX-FHIR-Server?level=INFO")
-             //   .to("file:OUTTX") // debugging
+               .to("file:OUTTX") // debugging
                 .onException(HttpOperationFailedException.class).to("log:ERR-Retry?level=ERROR&showException=true&showBody=false")
                 .maximumRedeliveries(2).redeliveryDelay(500).handled(false).end()
-                .to(FHIRServerProperties.getFHIRServer());
+                .to(FHIRServerProperties.getFHIRServer() + "?bridgeEndpoint=true");
     }
 
-    private void configureSslForHttp()
+    private SSLContext configureSslForHttp()
     {
         // dev
         String certPassword = "GzbfAByL";
@@ -176,18 +178,23 @@ public class CamelRouter extends RouteBuilder {
         try {
 
 
-            /*
-            InputStream keyStoreStream = this.getClass().getClassLoader().getResourceAsStream(certFile);
+
+            InputStream certStoreStream = this.getClass().getClassLoader().getResourceAsStream(certFile);
+            InputStream keyStoreStream = this.getClass().getClassLoader().getResourceAsStream(keyFile);
 
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
-            keyStore.load(keyStoreStream, keyPassword.toCharArray());
-            kmf.init(keyStore, keyPassword.toCharArray());
+            keyStore.load(certStoreStream, certPassword.toCharArray());
+
+            // Think we need to trust the cert here.....
+
+           // keyStore.load(null, null);
+            kmf.init(keyStore, certPassword.toCharArray());
             log.info("Certificate Loaded");
 
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
+            trustStore.load(keyStoreStream, keyPassword.toCharArray());
 
             // init the trust manager factory by read certificates
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -197,30 +204,15 @@ public class CamelRouter extends RouteBuilder {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
             SSLContext.setDefault(sslContext);
+            return sslContext;
 
-           */
-
-
-            KeyStoreParameters ksp = new KeyStoreParameters();
-            ksp.setResource(keyFile);
-            ksp.setPassword(keyPassword);
-
-            KeyManagersParameters kmp = new KeyManagersParameters();
-            kmp.setKeyStore(ksp);
-            kmp.setKeyPassword(keyPassword);
-
-            SSLContextParameters scp = new SSLContextParameters();
-            scp.setKeyManagers(kmp);
-
-            HttpComponent httpComponent = getContext().getComponent("https", HttpComponent.class);
-            httpComponent.setSslContextParameters(scp);
 
         } catch (Exception ex) {
            ex.printStackTrace();
            log.error("SSL "+ ex.getMessage());
         }
 
-
+        return null;
     }
 
 }

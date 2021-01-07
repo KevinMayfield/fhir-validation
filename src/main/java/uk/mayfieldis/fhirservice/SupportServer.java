@@ -3,6 +3,7 @@ package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
@@ -84,6 +85,11 @@ public class SupportServer extends SpringBootServletInitializer {
         };
     }
 
+    @Bean
+    public IGenericClient fhirClient(FhirContext r4ctx) {
+        String serverBase =  FHIRServerProperties.getFHIRServer();
+        return r4ctx.newRestfulGenericClient(serverBase);
+    }
 
     @Bean
     public FhirContext fhirContext() {
