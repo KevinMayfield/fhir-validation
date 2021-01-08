@@ -77,6 +77,12 @@ public class FHIRMessageToTransaction implements Processor {
                             break;
                     }
                     task.setAuthoredOn(new Date());
+                    if (bundle.hasIdentifier()) {
+                        task.addIdentifier(bundle.getIdentifier());
+                    }
+                    if (medicationRequest.hasSubject()) {
+                        task.setFor(medicationRequest.getSubject());
+                    }
                     if (medicationRequest.hasRequester()) {
                         task.setRequester(medicationRequest.getRequester());
                     }
@@ -88,7 +94,10 @@ public class FHIRMessageToTransaction implements Processor {
                     }
                 }
                 if (medicationRequest.hasIdentifier()) {
-                    task.addInput().setValue(new Reference().setIdentifier(medicationRequest.getIdentifierFirstRep()));
+                    task.addInput().setValue(new Reference()
+                            .setReference(entry.getFullUrl())
+                            .setIdentifier(medicationRequest.getIdentifierFirstRep())
+                            .setType("MedicationRequest"));
                 }
             }
 

@@ -154,7 +154,7 @@ public class CamelRouter extends RouteBuilder {
                 .process(validation)
                 .process(fhirMessageToTransaction)
                 .to("log:TX-FHIR-Server?level=INFO")
-               .to("file:OUTTX") // debugging
+             //  .to("file:OUTTX") // debugging
                 .onException(HttpOperationFailedException.class).to("log:ERR-Retry?level=ERROR&showException=true&showBody=false")
                 .maximumRedeliveries(2).redeliveryDelay(500).handled(false).end()
                 .to(FHIRServerProperties.getFHIRServer() + "?bridgeEndpoint=true");
