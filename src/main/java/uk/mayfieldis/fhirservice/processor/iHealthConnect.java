@@ -3,9 +3,14 @@ package uk.mayfieldis.fhirservice.processor;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 
 public class iHealthConnect implements Processor {
@@ -29,11 +34,31 @@ public class iHealthConnect implements Processor {
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
         con.setRequestMethod("POST");
 
+        con.setReadTimeout(10000);
+        con.setConnectTimeout(15000);
+        con.setRequestMethod("POST");
+        con.setDoInput(true);
         con.setDoOutput(true);
 
+        OutputStream os = con.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(os, "UTF-8"));
+
+        if (exchange.getIn().getHeader(Exchange.HTTP_QUERY) != null) {
+            log.info(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
+            writer.write(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
+        }
+        writer.flush();
+        writer.close();
+        os.close();
         con.connect();
 
-        exchange.getIn().setBody(con.getOutputStream());
+        System.out.println(con.getResponseCode());
+        if (con.getResponseCode() <300) {
+            exchange.getIn().setBody(con.getInputStream());
+        } else {
+            exchange.getIn().setBody(con.getErrorStream());
+        }
 
     }
 }
