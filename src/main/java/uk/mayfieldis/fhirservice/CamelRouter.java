@@ -67,6 +67,7 @@ public class CamelRouter extends RouteBuilder {
         FhirException fhirException = new FhirException();
         FHIRResponse fhirResponse = new FHIRResponse(ctx);
         iHealthConnect iHealthConnect = new iHealthConnect(configureSslForHttp());
+        iHealthAction iHealthAction = new iHealthAction(configureSslForHttp());
 
         onException(HttpOperationFailedException.class)
                 .to("log:BaseError?level=ERROR&showAll=true")
@@ -106,9 +107,20 @@ public class CamelRouter extends RouteBuilder {
                 .post()
                 .to("direct:ihealth");
 
+
+        rest("/ihealth/user/{userID}/{action}")
+            .get()
+            .to("direct:ihealthApi");
+
         rest("/ihealth/token").description("IHealth Token")
                 .post()
                 .to("direct:ihealthtoken");
+
+
+        from("direct:ihealthApi")
+                .to("log:PREIAPI?level=INFO&showAll=true")
+                .process(iHealthAction)
+                .to("log:POSTIAPI?level=INFO&showAll=true");
 
         from("direct:ihealthtoken")
                 .to("log:PRE1?level=INFO&showAll=true")
