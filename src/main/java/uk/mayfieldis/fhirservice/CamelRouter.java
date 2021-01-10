@@ -86,8 +86,8 @@ public class CamelRouter extends RouteBuilder {
                 .dataFormatProperty("prettyPrint", "true")
                 .enableCORS(true);
 
-        from("rest:get:hello")
-                .transform().constant("Bye World");
+        from("rest:get:ping")
+                .transform().constant("pong");
 
         rest("/")
                 .get()
