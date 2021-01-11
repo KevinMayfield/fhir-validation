@@ -102,6 +102,9 @@ public class FHIRRestfulServer extends RestfulServer {
 
 
 		if (FHIRServerProperties.getCorsEnabled()) {
+
+			/// Consider moving this to SpringSecurityConfiguration
+
 			CorsConfiguration config = new CorsConfiguration();
 			config.addAllowedHeader(HttpHeaders.ORIGIN);
 			config.addAllowedHeader(HttpHeaders.ACCEPT);
@@ -113,9 +116,9 @@ public class FHIRRestfulServer extends RestfulServer {
 			config.addAllowedHeader("Prefer");
 			String allAllowedCORSOrigins = FHIRServerProperties.getCorsAllowedOrigin();
 			Arrays.stream(allAllowedCORSOrigins.split(",")).forEach(o -> {
-				config.addAllowedOrigin(o);
+			// KGM 	config.addAllowedOrigin(o);
 			});
-			config.addAllowedOrigin(FHIRServerProperties.getCorsAllowedOrigin());
+			//config.addAllowedOrigin(FHIRServerProperties.getCorsAllowedOrigin());
 
 			config.addExposedHeader("Location");
 			config.addExposedHeader("Content-Location");

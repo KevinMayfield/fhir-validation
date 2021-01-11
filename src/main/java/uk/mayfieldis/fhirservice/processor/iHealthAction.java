@@ -27,12 +27,15 @@ public class iHealthAction implements Processor {
     public void process(Exchange exchange) throws Exception {
 
         HttpsURLConnection.setDefaultSSLSocketFactory(ssl.getSocketFactory());
+        String query =  exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString();
+        query = query.replace("smeg", "access_token");
+        log.warn(query);
         URL url = new URL("https://openapi.ihealthlabs.eu/openapiv2/user/"
                 +exchange.getIn().getHeader("userId")
                 +"/"
                 +exchange.getIn().getHeader("action")
                 +"/?"
-                +exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
+                +query);
 
         log.info(url.getHost());
         log.info(url.getPath());

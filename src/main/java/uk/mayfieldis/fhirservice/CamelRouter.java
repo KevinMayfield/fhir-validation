@@ -83,8 +83,8 @@ public class CamelRouter extends RouteBuilder {
 
         restConfiguration()
                 .component("servlet")
-                .dataFormatProperty("prettyPrint", "true")
-                .enableCORS(true);
+                .dataFormatProperty("prettyPrint", "true");
+              // Now using spring cors comnfiguration  .enableCORS(true);
 
         from("rest:get:ping")
                 .transform().constant("pong");
@@ -118,9 +118,9 @@ public class CamelRouter extends RouteBuilder {
 
 
         from("direct:ihealthApi")
-                .to("log:PREIAPI?level=INFO&showAll=true")
+                .to("log:IHEALTH-PRE?level=INFO&showAll=true")
                 .process(iHealthAction)
-                .to("log:POSTIAPI?level=INFO&showAll=true");
+                .to("log:IHEALTH-PRE?level=INFO&showAll=true");
 
         from("direct:ihealthtoken")
                 .to("log:PRE1?level=INFO&showAll=true")
