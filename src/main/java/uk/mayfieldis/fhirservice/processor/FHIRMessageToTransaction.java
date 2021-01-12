@@ -108,18 +108,16 @@ public class FHIRMessageToTransaction implements Processor {
             UUID uuid = UUID.randomUUID();
             entry.setFullUrl("urn:uuid:"+uuid);
         }
-
+        log.info("Converting to transaction");
         for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
 
             String conditionalUrl = getConditional(entry.getResource());
-           // inspect(entry.getResource().getClass());
-            analyze( entry.getResource());
             if (conditionalUrl !=null && !conditionalUrl.isEmpty()) {
                 if (MessageConfig.doUpdate(entry.getResource().getClass().getSimpleName(),messageHeader.getEventCoding().getCode())) {
                     // Always update, default is to create
                     entry.getRequest()
                             .setMethod(Bundle.HTTPVerb.PUT)
-                            .setUrl(entry.getResource().getClass().getSimpleName() + "?" + conditionalUrl);;
+                            .setUrl(entry.getResource().getClass().getSimpleName() + "?" + conditionalUrl);
                 } else {
                     entry.getRequest()
                             .setMethod(Bundle.HTTPVerb.POST)
@@ -132,6 +130,11 @@ public class FHIRMessageToTransaction implements Processor {
                         .setUrl(entry.getResource().getClass().getSimpleName());
             }
         }
+        log.info("Analyse bundle for reference identifiers");
+        for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+            analyze(entry.getResource());
+        }
+        log.info("Process requested additions");
         // Add in any newly created entries
         for (Bundle.BundleEntryComponent entry : bundleAdditions.getEntry()) {
             bundle.addEntry(entry);
@@ -152,7 +155,7 @@ public class FHIRMessageToTransaction implements Processor {
             if (field.get(obj) instanceof Reference) {
                 Reference reference = (Reference) field.get(obj);
                 if (reference.hasIdentifier()) {
-                  //  System.out.println(reference.getIdentifier().getSystem() + " - " + reference.getIdentifier().getValue());
+
                     if (reference.getIdentifier().getSystem().equals("https://fhir.nhs.uk/Id/nhs-number") && !reference.hasReference()) {
                         Patient patient = new Patient();
                         patient.addIdentifier(reference.getIdentifier());
@@ -168,28 +171,31 @@ public class FHIRMessageToTransaction implements Processor {
         });
     }
 
-    private void addEntry(Bundle bundle, Resource resource, Reference reference) {
+    private void addEntry(Bundle newBundle, Resource resource, Reference reference) {
 
         String ifNoneExists = resource.getClass().getSimpleName() + "?" + getConditional(resource);
         Bundle.BundleEntryComponent entry = null;
         for (Bundle.BundleEntryComponent entryComponent : bundle.getEntry()) {
-            if (entryComponent.hasRequest()
-                    && entryComponent.getRequest().hasIfNoneExist()
-                    && entryComponent.getRequest().getIfNoneExist().equals(ifNoneExists)) {
+            if (entryComponent.hasRequest() &&
+                    ((entryComponent.getRequest().hasIfNoneExist() && entryComponent.getRequest().getIfNoneExist().equals(ifNoneExists))
+                    || (entryComponent.getRequest().hasUrl() && entryComponent.getRequest().getUrl().equals(ifNoneExists))
+            )) {
                 entry = entryComponent;
-                log.info("duplicate found in original bundle: "+ifNoneExists);
+                log.debug("duplicate found in original bundle: "+ifNoneExists);
             }
         }
         for (Bundle.BundleEntryComponent entryComponent : bundleAdditions.getEntry()) {
-            if (entryComponent.hasRequest()
-                    && entryComponent.getRequest().hasIfNoneExist()
-                    && entryComponent.getRequest().getIfNoneExist().equals(ifNoneExists)) {
+            if (entryComponent.hasRequest() &&
+                    ((entryComponent.getRequest().hasIfNoneExist() && entryComponent.getRequest().getIfNoneExist().equals(ifNoneExists))
+                            || (entryComponent.getRequest().hasUrl() && entryComponent.getRequest().getUrl().equals(ifNoneExists))
+                    )) {
                 entry = entryComponent;
-                log.info("duplicate found in additions bundle: "+ifNoneExists);
+                log.debug("duplicate found in additions bundle: "+ifNoneExists);
             }
         }
         if (entry == null) {
-            entry = bundle.addEntry();
+            log.debug("Adding " + ifNoneExists);
+            entry = newBundle.addEntry();
             entry.setResource(resource);
             UUID uuid = UUID.randomUUID();
             entry.setFullUrl("urn:uuid:"+uuid);
