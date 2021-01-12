@@ -8,6 +8,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,7 +37,7 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
                         .antMatchers(HttpMethod.GET, "/services/**").hasAuthority("SCOPE_patient/*.*")
                         .antMatchers(HttpMethod.POST, "/services").hasAuthority("SCOPE_patient/*.*")
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt());
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 
         http
                 //.csrf().disable()
@@ -44,18 +45,7 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/error").permitAll()
                 .antMatchers("/R4/**").permitAll()
                 .anyRequest().authenticated();
-      /*
-        http
-                .authorizeRequests()
-                .antMatchers("/").permitAll().and().csrf().disable();
 
-        http
-                .authorizeRequests()
-                .antMatchers("/error").permitAll()
-                .antMatchers("/jolokia/**").hasRole("ACTUATOR")
-                .antMatchers("/hawtio/**").hasRole("ACTUATOR")
-                .and().httpBasic();
-*/
     }
 
     @Bean
