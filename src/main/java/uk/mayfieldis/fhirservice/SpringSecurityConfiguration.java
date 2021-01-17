@@ -37,6 +37,7 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
                         .antMatchers(HttpMethod.GET, "/services/**").hasAuthority("SCOPE_patient/*.*")
                         .antMatchers(HttpMethod.POST, "/services").hasAuthority("SCOPE_patient/*.*")
                 )
+                .exceptionHandling().disable()
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
 
         http

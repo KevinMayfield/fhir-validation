@@ -3,6 +3,7 @@ package uk.mayfieldis.fhirservice.processor;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -28,7 +29,13 @@ public class iHealthAction implements Processor {
 
         HttpsURLConnection.setDefaultSSLSocketFactory(ssl.getSocketFactory());
         String query =  exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString();
+
         query = query.replace("smeg", "access_token");
+        query = query + "&client_id="+ FHIRServerProperties.getIhealthClientId() +
+                "&client_secret="+FHIRServerProperties.getIhealthClientSecret();
+        query = query + "&sc="+ FHIRServerProperties.getIhealthSc() +
+                "&sv="+FHIRServerProperties.getIhealthSv();
+
         log.warn(query);
         URL url = new URL("https://openapi.ihealthlabs.eu/openapiv2/user/"
                 +exchange.getIn().getHeader("userId")

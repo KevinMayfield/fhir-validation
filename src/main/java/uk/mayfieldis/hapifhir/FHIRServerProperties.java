@@ -97,6 +97,17 @@ public class FHIRServerProperties {
     static final String TERMINOLOGY_VALIDATION_FLAG = "terminology.validation.flag";
     static final String TERMINOLOGY_SERVER = "terminology.server";
 
+    static final String IHEALTH_CLIENT_ID = "ihealth.client_id";
+    static final String  IHEALTH_CLIENT_SECRET = "ihealth.client_secret";
+    static final String IHEALTH_SC = "ihealth.sc";
+    static final String  IHEALTH_SV = "ihealth.sv";
+
+    static final String STRAVA_CLIENT_ID = "strava.client_id";
+    static final String  STRAVA_CLIENT_SECRET = "strava.client_secret";
+
+    static final String WITHINGS_CLIENT_ID = "withings.client_id";
+    static final String  WITHINGS_CLIENT_SECRET = "withings.client_secret";
+
     static final String FHIR_SERVER = "fhir.server";
 
     private static Properties properties;
@@ -542,4 +553,35 @@ public class FHIRServerProperties {
         return FHIRServerProperties.getProperty(FHIR_SERVER, "direct:FHIRServer");
     }
 
+    public static String getIhealthClientId() {
+        return FHIRServerProperties.getProperty(IHEALTH_CLIENT_ID);
+    }
+
+    public static String getIhealthClientSecret() {
+        return FHIRServerProperties.getProperty(IHEALTH_CLIENT_SECRET);
+    }
+
+    public static String getStravaClientId() {
+        return FHIRServerProperties.getProperty(STRAVA_CLIENT_ID);
+    }
+
+    public static String getStravaClientSecret() {
+        return FHIRServerProperties.getProperty(STRAVA_CLIENT_SECRET);
+    }
+
+    public static String getWithingsClientId() {
+        return FHIRServerProperties.getProperty(WITHINGS_CLIENT_ID);
+    }
+
+    public static String getWithingsClientSecret() {
+        return FHIRServerProperties.getProperty(WITHINGS_CLIENT_SECRET);
+    }
+
+    public static String getIhealthSc() {
+        return FHIRServerProperties.getProperty(IHEALTH_SC);
+    }
+
+    public static String getIhealthSv() {
+        return FHIRServerProperties.getProperty(IHEALTH_SV);
+    }
 }

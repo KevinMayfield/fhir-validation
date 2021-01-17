@@ -5,6 +5,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -43,10 +44,11 @@ public class iHealthConnect implements Processor {
         OutputStream os = con.getOutputStream();
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8"));
-
         if (exchange.getIn().getHeader(Exchange.HTTP_QUERY) != null) {
             log.info(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
             writer.write(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
+            writer.write("&client_id="+ FHIRServerProperties.getIhealthClientId() +
+                    "&client_secret="+FHIRServerProperties.getIhealthClientSecret());
         }
         writer.flush();
         writer.close();

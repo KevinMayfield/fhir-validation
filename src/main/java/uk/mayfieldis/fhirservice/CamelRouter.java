@@ -21,6 +21,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.http.base.HttpOperationFailedException;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.mayfieldis.fhirservice.processor.*;
@@ -68,6 +69,7 @@ public class CamelRouter extends RouteBuilder {
         FHIRResponse fhirResponse = new FHIRResponse(ctx);
         iHealthConnect iHealthConnect = new iHealthConnect(configureSslForHttp());
         iHealthAction iHealthAction = new iHealthAction(configureSslForHttp());
+        Clients clients = new Clients();
 
         onException(HttpOperationFailedException.class)
                 .to("log:BaseError?level=ERROR&showAll=true")
@@ -94,6 +96,12 @@ public class CamelRouter extends RouteBuilder {
                 .route()
                 .routeId("Ping")
                 .transform().constant("Hello World");
+
+        rest("/clients").description("OAuth2 Clients")
+                .get()
+                .to("direct:clients");
+        from("direct:clients").process(clients);
+
 
         rest("/token").description("Withings OAuth2")
                 .post()
