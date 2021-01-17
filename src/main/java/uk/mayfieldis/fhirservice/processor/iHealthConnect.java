@@ -45,7 +45,7 @@ public class iHealthConnect implements Processor {
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(os, "UTF-8"));
         if (exchange.getIn().getHeader(Exchange.HTTP_QUERY) != null) {
-            log.info(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
+            log.debug(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
             writer.write(exchange.getIn().getHeader(Exchange.HTTP_QUERY).toString());
             writer.write("&client_id="+ FHIRServerProperties.getIhealthClientId() +
                     "&client_secret="+FHIRServerProperties.getIhealthClientSecret());

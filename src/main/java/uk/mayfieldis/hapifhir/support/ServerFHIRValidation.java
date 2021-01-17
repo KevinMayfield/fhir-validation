@@ -60,13 +60,13 @@ public class ServerFHIRValidation {
 
                     MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
                     messageDefinitions.add(messageDefinition);
-                    log.info("MesageDefinition: {}",messageDefinition.getUrl() );
+                    log.debug("MesageDefinition: {}",messageDefinition.getUrl() );
                 }
                 for (String uri : serverIgPackage.list("package/examples")) {
                     if (uri.startsWith("MessageDefinition")) {
                         MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package/examples", uri));
                         messageDefinitions.add(messageDefinition);
-                        log.info("MesageDefinition: {}",messageDefinition.getUrl() );
+                        log.debug("MesageDefinition: {}",messageDefinition.getUrl() );
                     }
                 }
                 // For windows .... !!!
@@ -74,7 +74,7 @@ public class ServerFHIRValidation {
                     if (uri.startsWith("MessageDefinition")) {
                         MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package\\examples", uri));
                         messageDefinitions.add(messageDefinition);
-                        log.info("MesageDefinition: {}",messageDefinition.getUrl() );
+                        log.debug("MesageDefinition: {}",messageDefinition.getUrl() );
                     }
                 }
             } catch  (IOException ioex) {
@@ -124,7 +124,7 @@ public class ServerFHIRValidation {
                 log.error(next11.getMessage());
                 throw new UnprocessableEntityException(ctx, validationResult.toOperationOutcome());
             } else {
-                log.info(next11.getMessage());
+                log.debug(next11.getMessage());
             }
         }
 
@@ -226,7 +226,7 @@ public class ServerFHIRValidation {
                 for (Reference reference : messageHeader.getFocus()) {
                     for(Bundle.BundleEntryComponent entry : bundle.getEntry()) {
                         if (entry.hasFullUrl() && entry.getFullUrl().equals(reference.getReference())) {
-                            log.info("{}",entry.getResource().getClass().getSimpleName());
+                            log.debug("{}",entry.getResource().getClass().getSimpleName());
                             if (entry.getResource() instanceof DomainResource) {
                                 // Need to add in
                                 for (MessageDefinition.MessageDefinitionFocusComponent focusComponent : messageDefinition.getFocus()) {
@@ -252,7 +252,7 @@ public class ServerFHIRValidation {
             for (CapabilityStatement.CapabilityStatementRestComponent component : capabilityStatement.getRest()) {
                 for (CapabilityStatement.CapabilityStatementRestResourceComponent restResource : component.getResource()) {
                     if (restResource.getType().equals(resource.getClass().getSimpleName()) && restResource.hasProfile()) {
-                        log.info("Validating as {}", restResource.getProfile());
+                        log.debug("Validating as {}", restResource.getProfile());
                         if (resource instanceof DomainResource) {
                             ((DomainResource) resource).getMeta().addProfile(restResource.getProfile());
                         }

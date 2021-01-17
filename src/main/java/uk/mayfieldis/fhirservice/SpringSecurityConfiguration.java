@@ -1,6 +1,5 @@
 package uk.mayfieldis.fhirservice;
 
-import com.google.common.collect.ImmutableList;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +8,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,7 +21,8 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
+    private static final String AUTHORITY_PREFIX = "SCOPE_";
+    private static final String CLAIM_ROLES = "roles";
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -28,6 +31,14 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 /*
 // www.baeldung.com/spring-security-oauth-resource-server
+
+Also https://www.baeldung.com/spring-security-oauth2-jws-jwk
+Note we cant use the introspection endpoint as cognito doesn't support it.
+
+Do we add code to manually veriy key?
+https://stackoverflow.com/questions/48356287/is-there-any-java-example-of-verification-of-jwt-for-aws-cognito-api
+
+THis looks reaonable entry point https://dev.to/toojannarong/spring-security-with-jwt-the-easiest-way-2i43
 
  */
         http.cors();
@@ -38,7 +49,15 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
                         .antMatchers(HttpMethod.POST, "/services").hasAuthority("SCOPE_patient/*.*")
                 )
                 .exceptionHandling().disable()
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                .oauth2ResourceServer(oauth2ResourceServer ->
+                        oauth2ResourceServer
+                                //.authenticationEntryPoint().
+                                .jwt(jwt ->
+                                {
+                                    // add stuff here
+                                }))
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  ;
 
         http
                 //.csrf().disable()
@@ -76,6 +95,19 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private JwtAuthenticationConverter getJwtAuthenticationConverter() {
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(getJwtGrantedAuthoritiesConverter());
+        return jwtAuthenticationConverter;
+    }
+
+    private JwtGrantedAuthoritiesConverter getJwtGrantedAuthoritiesConverter() {
+        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+        converter.setAuthorityPrefix(AUTHORITY_PREFIX);
+        converter.setAuthoritiesClaimName(CLAIM_ROLES);
+        return converter;
     }
 
 

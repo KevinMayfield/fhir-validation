@@ -34,6 +34,9 @@ import uk.mayfieldis.hapifhir.validation.NPMConformanceParser;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
 
+import javax.net.ssl.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 //CHECKSTYLE:OFF
@@ -179,10 +182,10 @@ public class SupportServer extends SpringBootServletInitializer {
 
         // Ideally Terminology Server needs to run first to provide code validation
         if (FHIRServerProperties.getValidateTerminologyEnabled() && !FHIRServerProperties.getTerminologyServer().isEmpty()) {
-            log.info("Remote Terminology Support");
+            log.debug("Remote Terminology Support");
             validationSupportChain.addValidationSupport(new RemoteTerminologyServiceValidationSupportOnto(r4ctx));
         } else {
-            log.info("In memory Terminology Support");
+            log.debug("In memory Terminology Support");
             validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
         }
         validationSupportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(r4ctx));
@@ -291,14 +294,6 @@ public class SupportServer extends SpringBootServletInitializer {
         return registration;
     }
 
-    /*
-    @Bean
-    ServletRegistrationBean servletRegistrationBean() {
-        ServletRegistrationBean servlet = new ServletRegistrationBean
-                (new CamelHttpTransportServlet(), "/services/*");
-        servlet.setName("CamelServlet");
-        return servlet;
-    }
-*/
+
 }
 //CHECKSTYLE:ON

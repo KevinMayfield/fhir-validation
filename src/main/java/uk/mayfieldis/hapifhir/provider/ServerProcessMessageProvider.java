@@ -71,7 +71,7 @@ public class ServerProcessMessageProvider {
 
         ProducerTemplate template = context.createProducerTemplate();
 
-        log.info(httpRequest.getHeader(Exchange.CONTENT_TYPE));
+        log.debug(httpRequest.getHeader(Exchange.CONTENT_TYPE));
         try {
             Exchange exchange = template.send("direct:processMessage", ExchangePattern.InOut, new Processor() {
                 public void process(Exchange exchange) throws Exception {

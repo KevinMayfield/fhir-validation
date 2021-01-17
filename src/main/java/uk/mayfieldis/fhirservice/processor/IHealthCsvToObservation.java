@@ -36,7 +36,7 @@ public class IHealthCsvToObservation implements Processor {
         Object body = exchange.getIn().getBody();
         Bundle bundle= null;
         if (body instanceof InputStream) {
-            log.info("InputStream");
+
             bundle = new Bundle();
             CSVParser csvParser = null;
 
@@ -48,9 +48,9 @@ public class IHealthCsvToObservation implements Processor {
                 Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_16);
                 csvParser = new CSVParser(reader, CSVFormat.TDF.withFirstRecordAsHeader());
             }
-            log.info(csvParser.getHeaderMap().toString());
+            log.debug(csvParser.getHeaderMap().toString());
             for (CSVRecord record : csvParser.getRecords()) {
-                log.info("Records");
+                log.trace("Records");
                 String timestamp = record.get("Time");
                 String spo2 = record.get("SpO2");
                 String PI = "";
@@ -69,7 +69,6 @@ public class IHealthCsvToObservation implements Processor {
                     timestamp = dateStr + " " + timestamp + ":00";
 
                 }
-                log.info(timestamp);
                 if (!timestamp.isEmpty() && timestamp.length() > 1 ) {
                     Date date =new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(timestamp);
                     if (!spo2.isEmpty() ) {
@@ -112,7 +111,7 @@ public class IHealthCsvToObservation implements Processor {
             }
         }
         else if (body instanceof String) {
-            log.info("string");
+
             String string = (String) body;
             IBaseResource resource = ctx.newJsonParser().parseResource(string);
             if (resource instanceof Bundle) {

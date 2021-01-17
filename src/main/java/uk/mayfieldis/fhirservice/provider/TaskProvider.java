@@ -65,7 +65,7 @@ public class TaskProvider implements IResourceProvider {
         bundle.setType(Bundle.BundleType.COLLECTION);
 
         if (group != null) {
-            log.info(group.getValue());
+
             Bundle results = client
                     .search()
                     .forResource(MedicationRequest.class)
@@ -112,7 +112,7 @@ public class TaskProvider implements IResourceProvider {
         bundle.setType(Bundle.BundleType.COLLECTION);
 
         if (group != null) {
-            log.info(group.getValue());
+
             Bundle results = client
                     .search()
                     .forResource(MedicationRequest.class)
@@ -156,12 +156,12 @@ public class TaskProvider implements IResourceProvider {
         Bundle bundle = new Bundle();
         bundle.setType(Bundle.BundleType.COLLECTION);
 
-        log.info(String.valueOf(parameters.getParameter().size()));
+
         for (Parameters.ParametersParameterComponent parameterComponent : parameters.getParameter()) {
             if (parameterComponent.hasName() && parameterComponent.getName().equals("owner")) {
                 if (parameterComponent.getValue() instanceof Identifier) {
                     Identifier identifier = (Identifier) parameterComponent.getValue();
-                    log.info(identifier.getValue() + " - " + identifier.getSystem());
+                    log.trace(identifier.getValue() + " - " + identifier.getSystem());
                     Bundle search = client
                             .search()
                             .forResource(MedicationRequest.class)

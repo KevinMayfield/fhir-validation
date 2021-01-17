@@ -115,14 +115,13 @@ public class HRVCsvToObservation implements Processor {
             }
         }
         else if (body instanceof String) {
-            log.info("string");
             String string = (String) body;
             IBaseResource resource = ctx.newJsonParser().parseResource(string);
             if (resource instanceof Bundle) {
                 bundle = (Bundle) resource;
             }
         } else {
-            log.info(body.getClass().getCanonicalName());
+            log.debug(body.getClass().getCanonicalName());
         }
         if (bundle == null) {
             throw new UnprocessableEntityException("Empty Message or unknown type");

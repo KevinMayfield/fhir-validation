@@ -1,48 +1,17 @@
-# FHIR Validation Service
-
-## Getting Started
-
-It also performs FHIR Message serverFHIRValidation.
+# FHIR  Service
 
 
-To you will first need JDK 11 or higher and maven installed on your computer. 
-* https://adoptopenjdk.net/
-* https://maven.apache.org/index.html
+openssl s_client -connect cognito-idp.eu-west-2.amazonaws.com:443 \
+| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > cognito.cer
 
-To build the service use this command:  
+keytool -importcert -file cognito.cer -keystore keystore.jks -alias "Cognito"
 
-`mvn build install`
+openssl s_client -connect openapi.ihealthlabs.eu:443 \
+| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > ihealth.cer
 
-Tu run the service use this command:
+keytool -importcert -file ihealth.cer -keystore keystore.jks -alias "IHealth" 
 
-`mvn spring-boot:run`
+openssl s_client -connect fhir.mayfield-is.co.uk:443 \
+| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > fhir.cer
 
-Check the service is running via (on windows). Either:
-
-`powershell -Command "(new-object net.webclient).DownloadString('http://localhost:8187/R4/metadata')`
-
-`curl http://localhost:8187/R4/metadata`
-
-The `$validate` operation will now be available on `http://localhost:8187/R4/$validate`. See https://www.hl7.org/fhir/validation.html#op for instructions.
-
-## Using the open source HAPI FHIR libraries
-
-This validation service was built using the HAPI FHIR Libraries and is based on the [HAPI FHIR Validation](https://hapifhir.io/hapi-fhir/docs/validation/introduction.html) 
-
-## Package Configuration
-
-The `hapi.properties` contains the settings for the validator.
-
- | Setting | Default | Notes |
- | --- | --- | --- |
- | validate.flag | true | Leave set to true | 
- |server.ig.package | UK.DM.r4 | |
-|server.ig.version | 0.0.7-dev ||
-|server.ig.url | https://packages.simplifier.net/UK.DM.r4/-/UK.DM.r4-0.0.7-dev.tgz | Url of the validation package containing service specific rules |
-|core.ig.package | UK.Core.r4 ||
-|core.ig.version | 1.1.0 ||
-|core.ig.url | https://packages.simplifier.net/UK.Core.r4/-/UK.Core.r4-1.1.0.tgz | Url of the base validation package |
-|terminology.validation.flag |  true | Use to control terminology validation|
-|terminology.server | https://r4.ontoserver.csiro.au/fhir | If populated a remote terminology service will be used |
-|terminology.snomed.version | http://snomed.info/sct/999000031000000106/version/20200610 | This should state the SNOMED version for domain |
-
+keytool -importcert -file fhir.cer -keystore keystore.jks -alias "fhir" 

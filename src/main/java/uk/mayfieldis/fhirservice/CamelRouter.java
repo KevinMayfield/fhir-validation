@@ -100,7 +100,9 @@ public class CamelRouter extends RouteBuilder {
         rest("/clients").description("OAuth2 Clients")
                 .get()
                 .to("direct:clients");
-        from("direct:clients").process(clients);
+        from("direct:clients")
+                .to("log:CONIFG-CLIENT?level=INFO&showAll=true")
+                .process(clients);
 
 
         rest("/token").description("Withings OAuth2")
@@ -131,30 +133,27 @@ public class CamelRouter extends RouteBuilder {
                 .to("log:IHEALTH-PRE?level=INFO&showAll=true");
 
         from("direct:ihealthtoken")
-                .to("log:PRE1?level=INFO&showAll=true")
-              //  .removeHeaders("*")
+
                 .setHeader(Exchange.HTTP_PATH, simple("/OpenApiV2/OAuthv2/userauthorization/"))
                 .setHeader(Exchange.HTTP_METHOD, simple("POST"))
-                .to("log:PRE2?level=INFO&showAll=true")
+                .to("log:IHEALTH-PRE?level=INFO&showAll=true")
                 .process(iHealthConnect)
-                //.to("https://openapi.ihealthlabs.eu/?bridgeEndpoint=true")
-                .to("log:POST?level=INFO&showAll=true");
+                .to("log:IHEALTH-POST?level=INFO&showAll=true");
 
         from("direct:token")
-                .to("log:PRE1?level=INFO&showAll=true")
+                .to("log:WITHINGS-PRE?level=INFO&showAll=true")
                 .removeHeaders("*")
                 .setHeader(Exchange.CONTENT_TYPE, simple("application/x-www-form-urlencoded"))
                 .setHeader(Exchange.HTTP_PATH, simple("/oauth2/token"))
-                .to("log:PRE2?level=INFO&showAll=true")
                 .to("https://account.withings.com/?bridgeEndpoint=true")
-                .to("log:POST?level=INFO&showAll=true");
+                .to("log:WITHINGS-POST?level=INFO&showAll=true");
 
         from("direct:hrv")
-                .to("log:HRV?level=INFO&showAll=true")
+                .to("log:HRVCSV-PRE?level=INFO&showAll=true")
                 .process(HRVCsvToObservation);
 
         from("direct:ihealth")
-                .to("log:iHealth?level=INFO&showAll=true")
+                .to("log:IHEALTHCSV-PRE?level=INFO&showAll=true")
                 .process(iHealthCsvToObservation);
 
 
@@ -173,11 +172,12 @@ public class CamelRouter extends RouteBuilder {
                 .setHeader(Exchange.HTTP_PATH,constant(""))
                 .process(validation)
                 .process(fhirMessageToTransaction)
-                .to("log:TX-FHIR-Server?level=INFO")
+                .to("log:FHIR-PRE?level=INFO")
              //  .to("file:OUTTX") // debugging
                 .onException(HttpOperationFailedException.class).to("log:ERR-Retry?level=ERROR&showException=true&showBody=false")
                 .maximumRedeliveries(2).redeliveryDelay(500).handled(false).end()
-                .to(FHIRServerProperties.getFHIRServer() + "?bridgeEndpoint=true");
+                .to(FHIRServerProperties.getFHIRServer() + "?bridgeEndpoint=true")
+                .to("log:FHIR-POST?level=INFO");
     }
 
     private SSLContext configureSslForHttp()
@@ -186,8 +186,8 @@ public class CamelRouter extends RouteBuilder {
         String certPassword = "GzbfAByL";
         String certFile = "idscertificate-dev.p12";
 
-        String keyPassword = "1qaz1qaz";
-        String keyFile="bob.jks";
+        String keyPassword = "password";
+        String keyFile="keystore.jks";
         try {
 
 
@@ -204,7 +204,7 @@ public class CamelRouter extends RouteBuilder {
 
            // keyStore.load(null, null);
             kmf.init(keyStore, certPassword.toCharArray());
-            log.info("Certificate Loaded");
+            log.debug("Certificate Loaded");
 
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(keyStoreStream, keyPassword.toCharArray());

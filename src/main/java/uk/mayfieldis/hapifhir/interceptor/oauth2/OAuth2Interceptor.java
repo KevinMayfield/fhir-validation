@@ -74,7 +74,7 @@ public class OAuth2Interceptor {
         if (FHIRServerProperties.getSecurityOAuth2()) {
             log.trace("OAuth2 active");
             HttpClient client = getHttpClient();
-            log.info("OAuth2 openid = "+ FHIRServerProperties.getSecurityOAuth2Config());
+            log.trace("OAuth2 openid = "+ FHIRServerProperties.getSecurityOAuth2Config());
             HttpGet request = new HttpGet(FHIRServerProperties.getSecurityOAuth2Config());
             request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
             request.setHeader(HttpHeaders.ACCEPT, "application/json");
@@ -100,7 +100,7 @@ public class OAuth2Interceptor {
                 log.error(ex.getMessage());
             }
             if (openIdObj != null && openIdObj.has("jwks_uri"))  {
-                log.info("Calling jwks endpoint " + openIdObj.getString("jwks_uri"));
+                log.debug("Calling jwks endpoint " + openIdObj.getString("jwks_uri"));
                 request = new HttpGet(openIdObj.getString("jwks_uri"));
                 request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
                 request.setHeader(HttpHeaders.ACCEPT, "application/json");

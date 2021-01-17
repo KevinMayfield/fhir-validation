@@ -108,7 +108,7 @@ public class FHIRMessageToTransaction implements Processor {
             UUID uuid = UUID.randomUUID();
             entry.setFullUrl("urn:uuid:"+uuid);
         }
-        log.info("Converting to transaction");
+        log.trace("Converting to transaction");
         for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
 
             String conditionalUrl = getConditional(entry.getResource());
@@ -130,11 +130,11 @@ public class FHIRMessageToTransaction implements Processor {
                         .setUrl(entry.getResource().getClass().getSimpleName());
             }
         }
-        log.info("Analyse bundle for reference identifiers");
+        log.trace("Analyse bundle for reference identifiers");
         for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
             analyze(entry.getResource());
         }
-        log.info("Process requested additions");
+        log.trace("Process requested additions");
         // Add in any newly created entries
         for (Bundle.BundleEntryComponent entry : bundleAdditions.getEntry()) {
             bundle.addEntry(entry);
@@ -149,7 +149,7 @@ public class FHIRMessageToTransaction implements Processor {
 
             field.setAccessible(true);
             if (field.get(obj) instanceof BackboneElement) {
-                log.info("Backbone detected");
+                log.trace("Backbone element detected");
                 analyze(field.get(obj));
             }
             if (field.get(obj) instanceof Reference) {
@@ -225,7 +225,7 @@ public class FHIRMessageToTransaction implements Processor {
                         return getConditional(identifier);
                     }
                 } catch (Exception fr) {
-                    log.info("no getIdentifierFirstRep "+resource.getClass().getSimpleName());
+                    log.warn("no getIdentifierFirstRep "+resource.getClass().getSimpleName());
                 }
                 try {
                     Method getIdentifier
@@ -235,7 +235,7 @@ public class FHIRMessageToTransaction implements Processor {
                         return getConditional(identifier);
                     }
                 } catch (Exception fr) {
-                    log.info("no getIdentifier "+resource.getClass().getSimpleName());
+                    log.debug("no getIdentifier "+resource.getClass().getSimpleName());
                 }
             }
         } catch (Exception ex) {

@@ -87,7 +87,7 @@ public class ProviderResponseLibrary {
             OperationOutcome operationOutcome = (OperationOutcome) resource;
             if (ctx != null) {
                 String json = ctx.newJsonParser().encodeResourceToString(operationOutcome);
-                log.info("Sever Returned: {}", json);
+                log.trace("Sever Returned: {}", json);
             }
 
             OperationOutcomeFactory.convertToException(operationOutcome);

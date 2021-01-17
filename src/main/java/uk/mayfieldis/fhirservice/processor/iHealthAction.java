@@ -36,7 +36,7 @@ public class iHealthAction implements Processor {
         query = query + "&sc="+ FHIRServerProperties.getIhealthSc() +
                 "&sv="+FHIRServerProperties.getIhealthSv();
 
-        log.warn(query);
+        log.debug(query);
         URL url = new URL("https://openapi.ihealthlabs.eu/openapiv2/user/"
                 +exchange.getIn().getHeader("userId")
                 +"/"
@@ -44,9 +44,6 @@ public class iHealthAction implements Processor {
                 +"/?"
                 +query);
 
-        log.info(url.getHost());
-        log.info(url.getPath());
-        log.info(url.getQuery());
         HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setReadTimeout(10000);
