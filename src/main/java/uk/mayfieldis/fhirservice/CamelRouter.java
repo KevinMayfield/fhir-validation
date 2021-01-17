@@ -183,8 +183,8 @@ public class CamelRouter extends RouteBuilder {
     private SSLContext configureSslForHttp()
     {
         // dev
-        String certPassword = "GzbfAByL";
-        String certFile = "idscertificate-dev.p12";
+        String certPassword = FHIRServerProperties.getIhealthPassword();
+        String certFile = FHIRServerProperties.getIhealthCertificate();
 
         String keyPassword = "password";
         String keyFile="keystore.jks";

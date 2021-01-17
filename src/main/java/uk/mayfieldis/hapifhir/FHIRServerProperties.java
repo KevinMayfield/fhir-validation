@@ -101,6 +101,8 @@ public class FHIRServerProperties {
     static final String  IHEALTH_CLIENT_SECRET = "ihealth.client_secret";
     static final String IHEALTH_SC = "ihealth.sc";
     static final String  IHEALTH_SV = "ihealth.sv";
+    static final String IHEALTH_CERTIFICATE = "ihealth.certificate";
+    static final String IHEALTH_PASSWORD = "ihealth.password";
 
     static final String STRAVA_CLIENT_ID = "strava.client_id";
     static final String  STRAVA_CLIENT_SECRET = "strava.client_secret";
@@ -583,5 +585,13 @@ public class FHIRServerProperties {
 
     public static String getIhealthSv() {
         return FHIRServerProperties.getProperty(IHEALTH_SV);
+    }
+
+    public static String getIhealthCertificate() {
+        return FHIRServerProperties.getProperty(IHEALTH_CERTIFICATE);
+    }
+
+    public static String getIhealthPassword() {
+        return FHIRServerProperties.getProperty(IHEALTH_PASSWORD);
     }
 }
