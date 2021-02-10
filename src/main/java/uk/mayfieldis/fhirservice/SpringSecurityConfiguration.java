@@ -43,28 +43,49 @@ THis looks reaonable entry point https://dev.to/toojannarong/spring-security-wit
  */
         http.cors();
 
-        http
-                .authorizeRequests(authz -> authz
-                        .antMatchers(HttpMethod.GET, "/services/**").hasAuthority("SCOPE_patient/*.*")
-                        .antMatchers(HttpMethod.POST, "/services").hasAuthority("SCOPE_patient/*.*")
-                )
-                .exceptionHandling().disable()
-                .oauth2ResourceServer(oauth2ResourceServer ->
-                        oauth2ResourceServer
-                                //.authenticationEntryPoint().
-                                .jwt(jwt ->
-                                {
-                                    // add stuff here
-                                }))
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  ;
+        if (FHIRServerProperties.getSecurityOAuth2()) {
+            http
+                    .csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/R4/**").permitAll();
 
-        http
-                //.csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/error").permitAll()
-                .antMatchers("/R4/**").permitAll()
-                .anyRequest().authenticated();
+
+            http
+                    .authorizeRequests(authz -> authz
+                            .antMatchers(HttpMethod.GET, "/services/**").hasAuthority("SCOPE_patient/*.*")
+                            .antMatchers(HttpMethod.POST, "/services").hasAuthority("SCOPE_patient/*.*")
+                    )
+                    .exceptionHandling().disable()
+                    .oauth2ResourceServer(oauth2ResourceServer ->
+                            oauth2ResourceServer
+                                    //.authenticationEntryPoint().
+                                    .jwt(jwt ->
+                                    {
+                                        // add stuff here
+                                    }))
+                    .sessionManagement(sessionManagement ->
+                            sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+
+            http
+                    //.csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/error").permitAll()
+                    .anyRequest().authenticated();
+
+        } else {
+            http
+                    .authorizeRequests()
+                    .antMatchers("/").permitAll().and().csrf().disable();
+
+            http
+                    .authorizeRequests()
+                    .antMatchers("/error").permitAll()
+                    .antMatchers("/jolokia/**").hasRole("ACTUATOR")
+                    .antMatchers("/hawtio/**").hasRole("ACTUATOR")
+                    .and().httpBasic();
+        }
+
 
     }
 
