@@ -28,6 +28,9 @@
                     <reference value="urn:uuid:22a49ecc-eab1-4cc2-ba39-0d34ff8c2bd1" />
                 </focus>
                 <focus>
+                    <reference value="urn:uuid:e0094014-9659-4705-a481-0412eefd9dbc" />
+                </focus>
+                <focus>
                     <reference value="urn:uuid:c99b7aff-58fc-4e42-b8d4-80ac573e8bff" />
                 </focus>
                 <focus>
@@ -49,7 +52,7 @@
         <fullUrl value="urn:uuid:22a49ecc-eab1-4cc2-ba39-0d34ff8c2bd1" />
         <resource>
             <MedicationRequest xmlns="http://hl7.org/fhir">
-                <extension xmlns="http://hl7.org/fhir" url="https://fhir.nhs.uk/StructureDefinition/Extension-DM-prescriptionType">
+                <extension xmlns="http://hl7.org/fhir" url="https://fhir.nhs.uk/StructureDefinition/Extension-DM-PrescriptionType">
                     <valueCoding>
                         <system value="https://fhir.nhs.uk/CodeSystem/prescription-type" />
                         <code value="0101" />
@@ -155,14 +158,14 @@
                     </coding>
                     <text value="Aspirin 300mg dispersible tablets"></text>
                 </code>
-                <!-- <form>
+                <form>
                     <coding>
                         <system value="http://snomed.info/sct"></system>
                         <code value="35366911000001101"></code>
                         <display value="Dispersible tablet"></display>
                     </coding>
                     <text value="Dispersible tablet"></text>
-                </form> -->
+                </form>
             </Medication>
         </resource>
     </entry>
@@ -170,6 +173,7 @@
         <fullUrl value="urn:uuid:c99b7aff-58fc-4e42-b8d4-80ac573e8bff" />
         <resource>
             <Patient xmlns="http://hl7.org/fhir">
+                <id value="c99b7aff-58fc-4e42-b8d4-80ac573e8bff"></id>
                 <identifier>
                     <system value="https://ThinkEhr/Domain"></system>
                     <value value="default"></value>
@@ -223,6 +227,7 @@
         <fullUrl value="urn:uuid:46588c8c-c606-420b-b3cc-88fb74f5d41b" />
         <resource>
             <Encounter xmlns="http://hl7.org/fhir">
+                <id value="46588c8c-c606-420b-b3cc-88fb74f5d41b" />
                 <identifier>
                     <system value="https://fhir.taunton.nhs.uk/Id/Encounter"/>
                     <value value="10071" />
@@ -250,6 +255,7 @@
         <resource>
             <!--  This is the person who is authorising the prescription -->
             <Practitioner>
+                <id value="54f13dfd-5850-4498-a632-8a98f9ee2480" />
                 <!-- <AgentPerson classCode="AGNT">.agentPerson  1.2.826.0.1285.0.2.0.65 
             -->
                 <identifier>
