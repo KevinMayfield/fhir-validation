@@ -146,6 +146,16 @@ public class ValidationTestR4IT {
     }
 
     @Test
+    public void validateHomecareExampleWithMedicationResource() throws Exception {
+        log.info("validate HomecareExampleWithMedicationResource");
+
+        IBaseResource resource = getFileResourceJSON(EPS_EXAMPLES + "homecare-example-with-medication-resource.json");
+        ResponseEntity<String> out = validateBundle(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML);
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
     public void validateopenEPbetterexample() throws Exception {
         log.info("validate openEPbetterexample");
 
