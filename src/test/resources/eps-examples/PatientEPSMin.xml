@@ -1,0 +1,45 @@
+<Patient xmlns="http://hl7.org/fhir">
+    <identifier>
+        <extension url="https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-NHSNumberVerificationStatus">
+            <valueCodeableConcept>
+                <coding>
+                    <system value="https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus" />
+                    <code value="01" />
+                    <display value="Number present and verified" />
+                </coding>
+            </valueCodeableConcept>
+        </extension>
+        <system value="https://fhir.nhs.uk/Id/nhs-number" />
+        <value value="9000000009" />
+    </identifier>
+    <name>
+        <use value="usual" />
+        <family value="Smith" />
+        <given value="Jane" />
+        <prefix value="Mrs" />
+        <suffix value="MBE" />
+    </name>
+    <telecom>
+        <system value="phone" />
+        <value value="01632960587" />
+        <use value="work" />
+    </telecom>
+    <gender value="female" />
+    <birthDate value="2010-10-22" />
+    <address>
+        <use value="home" />
+        <line value="1 Trevelyan Square" />
+        <line value="Boar Lane" />
+        <line value="City Centre" />
+        <line value="Leeds" />
+        <line value="West Yorkshire" />
+        <postalCode value="LS1 6AE" />
+    </address>
+    <generalPractitioner>
+        <type value="Organization" />
+        <identifier>
+            <system value="https://fhir.nhs.uk/Id/ods-organization-code" />
+            <value value="Y12345" />
+        </identifier>
+    </generalPractitioner>
+</Patient>

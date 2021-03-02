@@ -115,6 +115,7 @@ public class ServerFHIRValidation {
                     || next11.getMessage().contains("https://fhir.nhs.uk/ValueSet/DM-MedicationDispense-Code")
                     || next11.getMessage().contains("http://hl7.org/fhir/ValueSet/units-of-time")
                     || next11.getMessage().contains("https://fhir.nhs.uk/R4/ValueSet/UKCore-MedicationDosageRoute")
+                    || next11.getMessage().contains("https://fhir.hl7.org.uk/ValueSet/UKCore-MedicationForm")
                    // || next11.getMessage().contains("StructureDefinition has no snapshot")
             ) {
                 // Unable to verify so set to low warning

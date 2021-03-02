@@ -1,0 +1,47 @@
+<Task xmlns="http://hl7.org/fhir">
+    <id value="6a2624a2-321b-470e-91a6-8ae7a065e2f0"/>
+    <identifier>
+        <system value="https://tools.ietf.org/html/rfc4122"></system>
+        <value value="5AC84C11-DB8B-44DA-8FCF-8980B3D13596"></value>
+    </identifier>
+    <status value="in-progress"></status> <!-- if this post results in no dispense-notifications then accepted else in-progress -->
+    <intent value="order"></intent>
+    <groupIdentifier>
+        <system value="https://fhir.nhs.uk/Id/prescription-order-number"></system>
+        <value value="88AF6C-C81007-00001C"></value>
+    </groupIdentifier>
+    <code>
+        <coding>
+            <system value="http://hl7.org/fhir/CodeSystem/task-code"></system>
+            <code value="abort"></code>
+            <display value="Mark the focal resource as no longer active"></display>
+        </coding>
+    </code>
+    <focus>
+        <type value="Bundle"/>
+        <identifier>
+           <system value="https://tools.ietf.org/html/rfc4122"/>
+           <value value="334a3195-1f6c-497a-8efe-d272ca9c4e38"/>
+        </identifier>
+    </focus>
+    <for>
+        <identifier>
+            <system value="https://fhir.nhs.uk/Id/nhs-number" />
+            <value value="9446368138" />
+        </identifier>
+    </for>
+    <authoredOn value="2020-12-21T17:03:20-00:00"></authoredOn>
+    <owner>
+        <identifier>
+            <system value="https://fhir.hl7.org.uk/Id/gphc-number"></system>
+            <value value="7654321"></value>
+        </identifier>
+    </owner>
+    <reasonCode>
+        <coding>
+            <system value="https://fhir.nhs.uk/CodeSystem/EPS-task-dispense-withdraw-reason"></system>
+            <code value="DA"></code>
+            <display value="Dosage Amendments"/>
+        </coding>
+    </reasonCode>
+</Task>
