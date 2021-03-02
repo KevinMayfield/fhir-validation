@@ -5,7 +5,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.UriType;
-import org.hl7.fhir.utilities.cache.NpmPackage;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
 
 import java.util.concurrent.atomic.AtomicReference;

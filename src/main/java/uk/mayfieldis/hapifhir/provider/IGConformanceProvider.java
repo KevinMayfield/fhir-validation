@@ -6,7 +6,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.r4.model.CapabilityStatement;
-import org.hl7.fhir.utilities.cache.NpmPackage;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
