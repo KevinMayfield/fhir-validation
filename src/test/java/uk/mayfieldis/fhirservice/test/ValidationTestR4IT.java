@@ -219,6 +219,36 @@ public class ValidationTestR4IT {
     }
 
     @Test
+    public void validateoutpatientfouritemscancelmorphine() throws Exception {
+        log.info("validate outpatientfouritemscancelmorphine");
+
+        IBaseResource resource = getFileResourceJSON(EPS_EXAMPLES + "outpatient-four-items-cancel-morphine.json");
+        ResponseEntity<String> out = validateBundle(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON);
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void validateoutpatientfouritemscancelresponsemorphine() throws Exception {
+        log.info("validate outpatientfouritemscancelresponsemorphine");
+
+        IBaseResource resource = getFileResourceJSON(EPS_EXAMPLES + "outpatient-four-items-cancel-response-morphine.json");
+        ResponseEntity<String> out = validateBundle(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON);
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void validateoutpatientfouritemscancelsubsequentresponsemorphine() throws Exception {
+        log.info("validate outpatientfouritemscancelsubsequentresponsemorphine");
+
+        IBaseResource resource = getFileResourceJSON(EPS_EXAMPLES + "outpatient-four-items-cancel-subsequent-response-morphine.json");
+        ResponseEntity<String> out = validateBundle(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON);
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
     public void validateMedicationRequestmissingSNOMEDMedicationCodesFail() throws Exception {
         log.info("validate MedicationRequest missingSNOMEDMedicationCodes fail");
 
