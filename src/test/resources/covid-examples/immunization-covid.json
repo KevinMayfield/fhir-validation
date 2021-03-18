@@ -1,0 +1,135 @@
+{
+    "resourceType": "Immunization",
+    "extension": [
+        {
+            "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-VaccinationProcedure",
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "system": "http://snomed.info/sct",
+                        "code": "1324681000000101",
+                        "display": "Administration of first dose of severe acute respiratory syndrome coronavirus 2 vaccine (procedure)"
+                    }
+                ]
+            }
+        }
+    ],
+    "identifier": [
+        {
+            "system": "https://tools.ietf.org/html/rfc4122",
+            "value": "a9e514e2-64fc-495e-9a92-28c786807879"
+        }
+    ],
+    "status": "completed",
+    "occurrenceDateTime": "2020-12-23T13:00:08.476+00:00",
+    "patient": {
+        "reference": "urn:uuid:edea022a-2d81-11eb-adc1-0242ac120002",
+        "type": "Patient",
+        "identifier":
+            {
+                "system": "https://fhir.nhs.uk/Id/nhs-number",
+                "value": "9987123456"
+            }
+
+    },
+    "vaccineCode": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "39114911000001105",
+                "display": "Talent 0.5ml dose solution for injection multidose vials (Secretary of State for Health)"
+            }
+        ]
+    },
+    "manufacturer": {
+        "display": "DREAMLAND Pharmaceuticals Ltd"
+    },
+    "lotNumber": "R04X",
+    "recorded": "2020-12-23",
+    "primarySource": true,
+    "site": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "368208006",
+                "display": "Left upper arm structure (body structure)"
+            }
+        ]
+    },
+    "route": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "78421000",
+                "display": "Intramuscular route (qualifier value)"
+            }
+        ]
+    },
+    "doseQuantity": {
+        "value": 1,
+        "unit": "pre-filled disposable injection",
+        "system": "http://snomed.info/sct",
+        "code": "3318611000001100"
+    },
+    "performer": [
+        {
+            "actor": {
+                "extension": [
+                    {
+                        "url": "https://fhir.nhs.uk/StructureDefinition/Extension-Spine-ActorRole",
+                        "valueCodeableConcept": {
+                            "text": "Nurse Practitioner"
+                        }
+                    }
+                ],
+                "display": "HOLDING, Rafferty",
+                "type": "Practitioner",
+                "identifier": {
+                    "system": "https://fhir.hl7.org.uk/Id/nmc-number",
+                    "value": "5566789"
+                }
+            }
+        },
+        {
+            "actor": {
+                "extension": [
+                    {
+                        "url": "https://fhir.nhs.uk/StructureDefinition/Extension-Spine-ActorRole",
+                        "valueCodeableConcept": {
+                            "system": "http://snomed.info/sct",
+                            "code": "413294000",
+                            "display": "Community health services (qualifier value)"
+                        }
+                    }
+                ],
+                "type": "Organization",
+                "identifier": {
+                    "value": "RX809",
+                    "system": "https://fhir.nhs.uk/Id/ods-organization-code"
+                }
+            },
+            "function": {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0443",
+                        "code": "AP",
+                        "display": "Administering Provider"
+                    }
+                ]
+            }
+        }
+    ],
+    "reasonCode": {
+        "coding": [
+            {
+                "system": "http://snomed.info/sct",
+                "code": "443684005",
+                "display": "Disease outbreak (event)"
+            }
+        ]
+    },
+    "expirationDate": "2021-04-29",
+    "protocolApplied": {
+        "doseNumberPositiveInt": 1
+    }
+}

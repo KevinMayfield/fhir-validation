@@ -37,6 +37,8 @@ public class ValidationTestR4IT {
 
     private static String SPINE_EXAMPLES = "spine-examples/";
 
+    private static String COVID_EXAMPLES = "covid-examples/";
+
     private static String FAIL_EXAMPLES = "examples/";
 
     @TestConfiguration
@@ -85,6 +87,8 @@ public class ValidationTestR4IT {
         return ctxtest.newXmlParser().parseResource(reader);
     }
 
+
+
     @Test
     public void metadataShouldReturnCapabilityStatement() throws Exception {
         assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/R4/metadata",
@@ -94,6 +98,37 @@ public class ValidationTestR4IT {
     @Test
     public void contextLoads() throws Exception {
     }
+
+    @Test
+    public void validateCOVIDObservation() throws Exception {
+        log.info("validate COVID Observation");
+
+        IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "observation-SARS-CoV-2-ORGY.json");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Observation");
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void validateCOVIDVaccination1stDose() throws Exception {
+        log.info("validate COVID Vaccination1stDose");
+
+        IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "immunization-covid.json");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Immunization");
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void validateCOVIDVaccination2ndDose() throws Exception {
+        log.info("validate COVID Vaccination2ndDose");
+
+        IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "immunization-covid-2nd-dose.json");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Immunization");
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
 
     @Test
     public void validatePrescriptionOrder() throws Exception {

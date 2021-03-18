@@ -1,0 +1,52 @@
+{
+    "id": "edea022a-2d81-11eb-adc1-0242ac120000",
+    "resourceType": "Immunization",
+    "extension": [
+      {
+        "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-VaccinationProcedure",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "1324691000000104",
+              "display": "Administration of second dose of severe acute respiratory syndrome coronavirus 2 vaccine (procedure)"
+            }
+          ]
+        }
+      }
+    ],
+  "identifier": [
+    {
+      "system": "https://tools.ietf.org/html/rfc4122",
+      "value": "7ec28d82-33bf-4e6d-a8de-91dcbc8d1802"
+    }
+  ],
+    "status": "completed",
+  "primarySource": true,
+    "occurrenceDateTime": "2021-02-23T13:00:08.476+00:00",
+    "patient": {
+      "reference": "urn:uuid:edea022a-2d81-11eb-adc1-0242ac120002",
+      "type": "Patient",
+      "identifier":
+        {
+          "system": "https://fhir.nhs.uk/Id/nhs-number",
+          "value": "9987123456"
+        }
+    },
+    "vaccineCode": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "39114911000001105",
+          "display": "Talent 0.5ml dose solution for injection multidose vials (Secretary of State for Health)"
+        }
+      ]
+    },
+    "manufacturer": {
+      "display": "DREAMLAND Pharmaceuticals Ltd"
+    },
+    "lotNumber": "R04X",
+    "protocolApplied": {
+      "doseNumberPositiveInt": 2
+    }
+}
