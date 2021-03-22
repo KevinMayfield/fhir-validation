@@ -129,6 +129,25 @@ public class ValidationTestR4IT {
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
     }
 
+    @Test
+    public void validateCOVIDJackDawkins() throws Exception {
+        log.info("validate COVID JackDawkins");
+
+        IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "patient-jack-dawkins.json");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Patient");
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void validateCOVIDRichardSmith() throws Exception {
+        log.info("validate COVID RichardSmith");
+
+        IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "patient-RichardSmith.json");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Patient");
+        log.info(out.getBody());
+        assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
+    }
 
     @Test
     public void validatePrescriptionOrder() throws Exception {

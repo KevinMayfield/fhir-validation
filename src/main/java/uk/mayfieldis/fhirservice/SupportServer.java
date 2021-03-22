@@ -3,6 +3,7 @@ package uk.mayfieldis.fhirservice;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -32,9 +33,6 @@ import uk.mayfieldis.hapifhir.validation.NPMConformanceParser;
 import uk.mayfieldis.hapifhir.support.ServerFHIRValidation;
 import uk.mayfieldis.hapifhir.validation.RemoteTerminologyServiceValidationSupportOnto;
 
-import javax.net.ssl.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.*;
 
 //CHECKSTYLE:OFF
@@ -50,7 +48,9 @@ public class SupportServer extends SpringBootServletInitializer {
      */
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SupportServer.class);
 
-    FhirContext ctx;
+    FhirContext r4ctx;
+
+    FhirContext r3ctx;
 
     @Autowired
     ApplicationContext context;
@@ -92,16 +92,31 @@ public class SupportServer extends SpringBootServletInitializer {
         return r4ctx.newRestfulGenericClient(serverBase);
     }
 
-    @Bean
+    @Bean(name="r4ctx")
     public FhirContext fhirContext() {
-        if (this.ctx == null) {
-            this.ctx = FhirContext.forR4();
+
+
+
+
+        if (this.r4ctx == null) {
+            LenientErrorHandler lenientErrorHandler = new LenientErrorHandler();
+            lenientErrorHandler.setErrorOnInvalidValue(false);
+            this.r4ctx = FhirContext.forR4();
+            this.r4ctx.setParserErrorHandler(lenientErrorHandler);
         }
-       return this.ctx;
+       return this.r4ctx;
+    }
+
+    @Bean(name="r3ctx")
+    public FhirContext fhirStu3Context() {
+        if (this.r3ctx == null) {
+            this.r3ctx = FhirContext.forDstu3();
+        }
+        return this.r3ctx;
     }
 
     @Bean
-    public FhirValidator fhirValidator( FhirContext r4ctx) {
+    public FhirValidator fhirValidator(@Qualifier("r4ctx") FhirContext r4ctx) {
 
         return r4ctx.newValidator();
     }
@@ -160,7 +175,7 @@ public class SupportServer extends SpringBootServletInitializer {
     }
 
     @Bean
-    public ServerFHIRValidation getValidation(FhirValidator val, FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
+    public ServerFHIRValidation getValidation(FhirValidator val,@Qualifier("r4ctx") FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
         return new ServerFHIRValidation(val,ctx,serverIgPackage);
     }
 
@@ -189,21 +204,21 @@ public class SupportServer extends SpringBootServletInitializer {
         validationSupportChain.addValidationSupport(new SnapshotGeneratingValidationSupport(r4ctx));
 
         if (validationIgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport= NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validationIgPackage);
+            PrePopulatedValidationSupport igValidationSupport= NPMConformanceParser.getPrePopulatedValidationSupport(r4ctx, validationIgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
 
         }
         if (validation2IgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation2IgPackage);
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(r4ctx, validation2IgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
 
         }
         if (validation3IgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, validation3IgPackage);
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(r4ctx, validation3IgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
         }
         if (serverIgPackage !=null) {
-            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(ctx, serverIgPackage);
+            PrePopulatedValidationSupport igValidationSupport = NPMConformanceParser.getPrePopulatedValidationSupport(r4ctx, serverIgPackage);
             validationSupportChain.addValidationSupport(igValidationSupport);
         }
 
@@ -224,74 +239,35 @@ public class SupportServer extends SpringBootServletInitializer {
 
         return instanceValidator;
 
-        /*
-        ValidationSupportChain
-                validationSupportChain = new ValidationSupportChain();
 
-        DefaultProfileValidationSupport defaultProfileValidationSupport = new DefaultProfileValidationSupport(r4ctx);
-        validationSupportChain.addValidationSupport(defaultProfileValidationSupport);
-
-
-        IWorkerContext context = new HapiWorkerContext(r4ctx,validationSupportChain);
-
-        if (FHIRServerProperties.getValidateTerminologyEnabled()) {
-            // Use in memory validation first
-            // Note: this requires ValueSets to be expanded
-            validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
-
-            if (FHIRServerProperties.getTerminologyServer() != null) {
-
-                // Use ontoserver
-                // Create a module that uses a remote terminology service
-
-                RemoteTerminologyServiceValidationSupportOnto remoteTermSvc = new RemoteTerminologyServiceValidationSupportOnto(ctx);
-                remoteTermSvc.setBaseUrl(FHIRServerProperties.getTerminologyServer());
-
-                validationSupportChain.addValidationSupport(remoteTermSvc);
-            } else {
-
-            }
-        }
-
-        SnapshotGeneratingValidationSupport snapshotGeneratingValidationSupport = new SnapshotGeneratingValidationSupport(ctx);
-        validationSupportChain.addValidationSupport(snapshotGeneratingValidationSupport);
-
-// Wrap the chain in a cache to improve performance
-        CachingValidationSupport cache = new CachingValidationSupport(validationSupportChain);
-
-
-        // We try the above validators first
-
-        val.setValidateAgainstStandardSchema(FHIRServerProperties.getValidationSchemaFlag());
-
-        val.setValidateAgainstStandardSchematron(FHIRServerProperties.getValidationSchemaFlag());
-
-        FhirInstanceValidator instanceValidator = new FhirInstanceValidator(r4ctx);
-        val.registerValidatorModule(instanceValidator);
-
-
-        instanceValidator.setValidationSupport(validationSupportChain);
-
-
-        return instanceValidator;
-
-         */
     }
 
 
     @Bean
-    public ServletRegistrationBean ServletRegistrationBean(FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) {
+    public ServletRegistrationBean FHIRServerR4RegistrationBean(@Qualifier("r4ctx") FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) {
 
-        ServletRegistrationBean registration = new ServletRegistrationBean(new FHIRRestfulServer(context, ctx, serverIgPackage), "/R4/*");
+        ServletRegistrationBean registration = new ServletRegistrationBean(new FHIRR4RestfulServer(context, ctx, serverIgPackage), "/R4/*");
         Map<String,String> params = new HashMap<>();
         params.put("FhirVersion","R4");
         params.put("ImplementationDescription","FHIR Validation Server");
         registration.setInitParameters(params);
-        registration.setName("FhirServlet");
+        registration.setName("FhirR4Servlet");
         registration.setLoadOnStartup(1);
         return registration;
     }
 
+    @Bean
+    public ServletRegistrationBean FHIRServerR3RegistrationBean(@Qualifier("r3ctx") FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) {
+
+        ServletRegistrationBean registration = new ServletRegistrationBean(new FHIRR3RestfulServer(context, ctx, null), "/STU3/*");
+        Map<String,String> params = new HashMap<>();
+        params.put("FhirVersion","R4");
+        params.put("ImplementationDescription","FHIR Conversion Server");
+        registration.setInitParameters(params);
+        registration.setName("FhirR3Servlet");
+        registration.setLoadOnStartup(2);
+        return registration;
+    }
 
 }
 //CHECKSTYLE:ON

@@ -69,6 +69,9 @@ public class OAuth2Interceptor {
 
         log.trace("OAuth2 init");
         excludedPaths.add("/metadata");
+        excludedPaths.add("/$validate");
+        excludedPaths.add("/$convert");
+        excludedPaths.add("/$convertR4");
         appCtx = context;
 
         if (FHIRServerProperties.getSecurityOAuth2()) {

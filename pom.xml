@@ -18,7 +18,7 @@
       <hapi-fhir-version>5.3.0</hapi-fhir-version>
       <slf4j>1.7.25</slf4j>
       <phloc_commons_version>4.4.11</phloc_commons_version>
-      <ph_schematron_version>5.0.4</ph_schematron_version>
+      <ph_schematron_version>5.6.5</ph_schematron_version>
       <jackson_version>2.11.0</jackson_version>
       <camel-version>3.7.0</camel-version>
   </properties>
@@ -169,6 +169,13 @@
           <version>${hapi-fhir-version}</version>
       </dependency>
 
+
+      <dependency>
+          <groupId>ca.uhn.hapi.fhir</groupId>
+          <artifactId>hapi-fhir-structures-dstu3</artifactId>
+          <version>${hapi-fhir-version}</version>
+          <optional>true</optional>
+      </dependency>
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>

@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
 import uk.mayfieldis.hapifhir.support.ProviderResponseLibrary;
@@ -25,6 +26,7 @@ public class ResourceTestProviderR4 {
 
 
     @Autowired()
+	@Qualifier("r4ctx")
     FhirContext ctx;
 
 	@Autowired

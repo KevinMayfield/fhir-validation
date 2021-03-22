@@ -23,6 +23,7 @@ import org.apache.camel.http.base.HttpOperationFailedException;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.mayfieldis.fhirservice.processor.*;
 import uk.mayfieldis.hapifhir.FHIRServerProperties;
@@ -46,6 +47,7 @@ public class CamelRouter extends RouteBuilder {
     static final String FHIR_VALIDATION = "direct:FHIR-Validation";
 
     @Autowired
+    @Qualifier("r4ctx")
     FhirContext ctx;
 
     @Autowired

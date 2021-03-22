@@ -28,10 +28,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
-public class FHIRRestfulServer extends RestfulServer {
+public class FHIRR4RestfulServer extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
-	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FHIRRestfulServer.class);
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FHIRR4RestfulServer.class);
 
 	private ApplicationContext applicationContext;
 
@@ -40,9 +40,9 @@ public class FHIRRestfulServer extends RestfulServer {
 	private FhirContext ctx;
 
 
-	public FHIRRestfulServer(ApplicationContext context,
-							 FhirContext ctx,
-							 NpmPackage serverIgPackage) {
+	public FHIRR4RestfulServer(ApplicationContext context,
+							   FhirContext ctx,
+							   NpmPackage serverIgPackage) {
 		this.applicationContext = context;
 		this.serverIgPackage = serverIgPackage;
 		this.ctx = ctx;
