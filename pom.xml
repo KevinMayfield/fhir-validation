@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.mayfieldis</groupId>
   <artifactId>fhir-service</artifactId>
-  <version>5.3.0</version>
+  <version>5.3.1</version>
   <packaging>jar</packaging>
 
   <name>fhir-service</name>

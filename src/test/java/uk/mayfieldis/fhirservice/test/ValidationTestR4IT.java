@@ -104,7 +104,7 @@ public class ValidationTestR4IT {
         log.info("validate COVID Observation");
 
         IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "observation-SARS-CoV-2-ORGY.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Observation");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Observation");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
     }
@@ -114,7 +114,7 @@ public class ValidationTestR4IT {
         log.info("validate COVID Vaccination1stDose");
 
         IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "immunization-covid.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Immunization");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Immunization");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
     }
@@ -124,7 +124,7 @@ public class ValidationTestR4IT {
         log.info("validate COVID Vaccination2ndDose");
 
         IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "immunization-covid-2nd-dose.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Immunization");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Immunization");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
     }
@@ -134,7 +134,7 @@ public class ValidationTestR4IT {
         log.info("validate COVID JackDawkins");
 
         IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "patient-jack-dawkins.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Patient");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Patient");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
     }
@@ -144,7 +144,7 @@ public class ValidationTestR4IT {
         log.info("validate COVID RichardSmith");
 
         IBaseResource resource = getFileResourceJSON(COVID_EXAMPLES + "patient-RichardSmith.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Patient");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Patient");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
     }
@@ -337,7 +337,7 @@ public class ValidationTestR4IT {
         log.info("validate Organization");
 
         IBaseResource resource = getFileResourceXML(SPINE_EXAMPLES + "Organization.xml");
-        ResponseEntity<String> out = validateResource(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML, "https://fhir.nhs.uk/StructureDefinition/Spine-Organization");
+        ResponseEntity<String> out = validateResource(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Organization");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
 
@@ -351,7 +351,7 @@ public class ValidationTestR4IT {
         log.info("validate PatientPDS");
 
         IBaseResource resource = getFileResourceJSON(SPINE_EXAMPLES +"Patient-PDS.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Patient");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Patient");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
 
@@ -365,7 +365,7 @@ public class ValidationTestR4IT {
         log.info("validate PatientPDS");
 
         IBaseResource resource = getFileResourceJSON(FAIL_EXAMPLES +"Patient-PDS-fail.json");
-        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/Spine-Patient");
+        ResponseEntity<String> out = validateResource(ctxtest.newJsonParser().encodeResourceToString(resource),MediaType.APPLICATION_JSON, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Patient");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -387,7 +387,7 @@ public class ValidationTestR4IT {
         log.info("validate Practitioner");
 
         IBaseResource resource = getFileResourceXML(SPINE_EXAMPLES +"Practitioner.xml");
-        ResponseEntity<String> out = validateResource(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML, "https://fhir.nhs.uk/StructureDefinition/Spine-Practitioner");
+        ResponseEntity<String> out = validateResource(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-Practitioner");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
 
@@ -400,7 +400,7 @@ public class ValidationTestR4IT {
         log.info("validate PractitionerRole");
 
         IBaseResource resource = getFileResourceXML(SPINE_EXAMPLES +"PractitionerRole-pass.xml");
-        ResponseEntity<String> out = validateResource(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML, "https://fhir.nhs.uk/StructureDefinition/Spine-PractitionerRole");
+        ResponseEntity<String> out = validateResource(ctxtest.newXmlParser().encodeResourceToString(resource),MediaType.APPLICATION_XML, "https://fhir.nhs.uk/StructureDefinition/NHSDigital-PractitionerRole");
         log.info(out.getBody());
         assertThat(out.getStatusCode()).isEqualByComparingTo(HttpStatus.OK);
 

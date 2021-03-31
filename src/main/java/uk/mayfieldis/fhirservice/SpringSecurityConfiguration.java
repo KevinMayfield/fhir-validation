@@ -48,7 +48,10 @@ THis looks reaonable entry point https://dev.to/toojannarong/spring-security-wit
                     .csrf().disable()
                     .authorizeRequests()
                     .antMatchers("/R4/**").permitAll();
-
+            http
+                    .csrf().disable()
+                    .authorizeRequests()
+                    .antMatchers("/STU3/**").permitAll();
 
             http
                     .authorizeRequests(authz -> authz
