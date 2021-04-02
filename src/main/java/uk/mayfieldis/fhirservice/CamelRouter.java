@@ -74,7 +74,7 @@ public class CamelRouter extends RouteBuilder {
         Clients clients = new Clients();
 
         onException(HttpOperationFailedException.class)
-                .to("log:BaseError?level=ERROR&showAll=true")
+                .to("log:ERROR-CAMEL?level=ERROR&showAll=true")
                 .handled(true)
                 .process(fhirException)
                 .process(fhirResponse);
