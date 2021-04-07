@@ -26,12 +26,12 @@ public class ServerFHIRValidation {
     FhirContext ctx;
 
 
-    NpmPackage serverIgPackage;
+    List<NpmPackage> serverPackages;
 
     private static final Logger log = LoggerFactory.getLogger(ServerFHIRValidation.class);
 
 
-    public ServerFHIRValidation(FhirValidator _validator, FhirContext _ctx, NpmPackage serverIgPackage) throws Exception
+    public ServerFHIRValidation(FhirValidator _validator, FhirContext _ctx, List<NpmPackage> serverIgPackage) throws Exception
     {
         this.setup(_validator, _ctx, serverIgPackage );
     }
@@ -39,42 +39,45 @@ public class ServerFHIRValidation {
     public ServerFHIRValidation() {
     }
 
-    public void setup(FhirValidator _validator, FhirContext _ctx, NpmPackage serverIgPackage) throws Exception {
+    public void setup(FhirValidator _validator, FhirContext _ctx, List<NpmPackage> serverIgPackages) throws Exception {
 
         this.validator = _validator;
         this.ctx = _ctx;
-        this.serverIgPackage = serverIgPackage;
+        this.serverPackages = serverIgPackages;
 
         if (capabilityStatements ==null ) {
             // Load if not setup
             try {
-                capabilityStatements = new ArrayList<>();
-                for (String uri : serverIgPackage.listResources("CapabilityStatement")) {
+                for (NpmPackage serverIgPackage : serverIgPackages) {
+                    capabilityStatements = new ArrayList<>();
+                    for (String uri : serverIgPackage.listResources("CapabilityStatement")) {
 
-                    CapabilityStatement capabilityStatement = (CapabilityStatement) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
-                    capabilityStatements.add(capabilityStatement);
-                }
-                messageDefinitions = new ArrayList<>();
-
-                for (String uri : serverIgPackage.listResources("MessageDefinition")) {
-
-                    MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
-                    messageDefinitions.add(messageDefinition);
-                    log.debug("MesageDefinition: {}",messageDefinition.getUrl() );
-                }
-                for (String uri : serverIgPackage.list("package/examples")) {
-                    if (uri.startsWith("MessageDefinition")) {
-                        MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package/examples", uri));
-                        messageDefinitions.add(messageDefinition);
-                        log.debug("MesageDefinition: {}",messageDefinition.getUrl() );
+                        CapabilityStatement capabilityStatement = (CapabilityStatement) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
+                        log.info("CapabilityStatement: {}", capabilityStatement.getUrl());
+                        capabilityStatements.add(capabilityStatement);
                     }
-                }
-                // For windows .... !!!
-                for (String uri : serverIgPackage.list("package\\examples")) {
-                    if (uri.startsWith("MessageDefinition")) {
-                        MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package\\examples", uri));
+                    messageDefinitions = new ArrayList<>();
+
+                    for (String uri : serverIgPackage.listResources("MessageDefinition")) {
+
+                        MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package", uri));
                         messageDefinitions.add(messageDefinition);
-                        log.debug("MesageDefinition: {}",messageDefinition.getUrl() );
+                        log.debug("MesageDefinition: {}", messageDefinition.getUrl());
+                    }
+                    for (String uri : serverIgPackage.list("package/examples")) {
+                        if (uri.startsWith("MessageDefinition")) {
+                            MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package/examples", uri));
+                            messageDefinitions.add(messageDefinition);
+                            log.debug("MesageDefinition: {}", messageDefinition.getUrl());
+                        }
+                    }
+                    // For windows .... !!!
+                    for (String uri : serverIgPackage.list("package\\examples")) {
+                        if (uri.startsWith("MessageDefinition")) {
+                            MessageDefinition messageDefinition = (MessageDefinition) ctx.newJsonParser().parseResource(serverIgPackage.load("package\\examples", uri));
+                            messageDefinitions.add(messageDefinition);
+                            log.debug("MesageDefinition: {}", messageDefinition.getUrl());
+                        }
                     }
                 }
             } catch  (IOException ioex) {
@@ -137,18 +140,21 @@ public class ServerFHIRValidation {
         if (resource instanceof Bundle) {
             // Bundle special case
             Bundle bundle = (Bundle) resource;
-            if (bundle.getType().equals(Bundle.BundleType.MESSAGE)) {
-                // Message Defintition validation
-                if (capabilityStatements != null) {
+
+            // Message Defintition validation
+            if (capabilityStatements != null) {
+
+                if (bundle.getType().equals(Bundle.BundleType.MESSAGE)) {
                     ValidationResult result = checkMessageAcceptable(bundle);
                     if (result != null) return result;
+                }
 
-                    // Use this to force entries to use specified profiles
-                    // Hopefully not required in a messaging context
-                    for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-                        if (entry.hasResource()) {
-                            setProfile(entry.getResource());
-                        }
+                // Use this to force entries to use specified profiles
+                // Hopefully not required in a messaging context
+                for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                    // Ignore patient when in a generic bundle.
+                    if (entry.hasResource()) {
+                        setProfile(entry.getResource());
                     }
                 }
             }
@@ -253,7 +259,7 @@ public class ServerFHIRValidation {
             for (CapabilityStatement.CapabilityStatementRestComponent component : capabilityStatement.getRest()) {
                 for (CapabilityStatement.CapabilityStatementRestResourceComponent restResource : component.getResource()) {
                     if (restResource.getType().equals(resource.getClass().getSimpleName()) && restResource.hasProfile()) {
-                        log.debug("Validating as {}", restResource.getProfile());
+                        log.info("Validating as {}", restResource.getProfile());
                         if (resource instanceof DomainResource) {
                             ((DomainResource) resource).getMeta().addProfile(restResource.getProfile());
                         }

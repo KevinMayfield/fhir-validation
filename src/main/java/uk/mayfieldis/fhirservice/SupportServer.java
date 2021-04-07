@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 
@@ -175,8 +176,15 @@ public class SupportServer extends SpringBootServletInitializer {
     }
 
     @Bean
-    public ServerFHIRValidation getValidation(FhirValidator val,@Qualifier("r4ctx") FhirContext ctx, @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
-        return new ServerFHIRValidation(val,ctx,serverIgPackage);
+    public ServerFHIRValidation getValidation(FhirValidator val,@Qualifier("r4ctx") FhirContext ctx, @Qualifier("coreIgPackage") NpmPackage validationIgPackage,
+                                              @Qualifier("core2IgPackage") NpmPackage validation2IgPackage,
+                                              @Qualifier("serverIgPackage") NpmPackage serverIgPackage) throws Exception {
+        List<NpmPackage> packages = new ArrayList<>();
+        if (serverIgPackage != null) packages.add(serverIgPackage);
+        if (validationIgPackage != null) packages.add(validationIgPackage);
+        if (validation2IgPackage != null) packages.add(validation2IgPackage);
+       // if (validation3IgPackage != null) packages.add(validation3IgPackage);
+        return new ServerFHIRValidation(val,ctx,packages);
     }
 
     @Bean
@@ -196,7 +204,15 @@ public class SupportServer extends SpringBootServletInitializer {
         // Ideally Terminology Server needs to run first to provide code validation
         if (FHIRServerProperties.getValidateTerminologyEnabled() && !FHIRServerProperties.getTerminologyServer().isEmpty()) {
             log.debug("Remote Terminology Support");
-            validationSupportChain.addValidationSupport(new RemoteTerminologyServiceValidationSupportOnto(r4ctx));
+            RemoteTerminologyServiceValidationSupport remoteTerminologyServiceValidationSupport = new RemoteTerminologyServiceValidationSupport(r4ctx);
+            remoteTerminologyServiceValidationSupport.setBaseUrl(FHIRServerProperties.getTerminologyServer());
+
+           // String token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJxbmg2ZDBrUWFqTDhYY01IXzgxdFFFd1pWV1daNXpkMnFPbF9vY0g5LTVJIn0.eyJleHAiOjE2MTc3NzU3NzQsImlhdCI6MTYxNzc3Mzk3NCwianRpIjoiOTI0YmVhMGMtOTMzYi00NWU4LWE0NWUtZjQ1OTVmOGEwY2EzIiwiaXNzIjoiaHR0cHM6Ly9vbnRvbG9neS5uaHMudWsvYXV0aG9yaXNhdGlvbi9hdXRoL3JlYWxtcy9uaHMtZGlnaXRhbC10ZXJtaW5vbG9neSIsImF1ZCI6WyJodHRwczovL29udG9sb2d5Lm5ocy51ay9wcm9kdWN0aW9uMS9maGlyIiwiaHR0cHM6Ly9vbnRvbG9neS5uaHMudWsvYXV0aG9yaW5nL2ZoaXIiXSwic3ViIjoiNTM3MzIxNzctYTNhZC00NDcyLWFkZTEtOWFlMGI4YzI4NzI1IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiTkhTRF9LZXZpbl9NYXlmaWVsZCIsInNlc3Npb25fc3RhdGUiOiIwZGMyNGNjNS1mYTViLTQ3NGItYTU4OC1hYmI1Njc5Yjc2Y2QiLCJhY3IiOiIxIiwic2NvcGUiOiJyZXN0cmljdGVkLXJlYWQiLCJjbGllbnRIb3N0IjoiMTAuMy4yMTAuNCIsImNsaWVudElkIjoiTkhTRF9LZXZpbl9NYXlmaWVsZCIsImNsaWVudEFkZHJlc3MiOiIxMC4zLjIxMC40IiwiYXV0aG9yaXRpZXMiOlsiaHR0cHM6Ly9vbnRvbG9neS5uaHMudWsvcHJvZHVjdGlvbjEvZmhpckZISVJfUkVBRCIsImh0dHBzOi8vb250b2xvZ3kubmhzLnVrL3Byb2R1Y3Rpb24xL2ZoaXJTWU5EX1JFQUQiLCJodHRwczovL29udG9sb2d5Lm5ocy51ay9hdXRob3JpbmcvZmhpckZISVJfV1JJVEUiLCJodHRwczovL29udG9sb2d5Lm5ocy51ay9hdXRob3JpbmcvZmhpckZISVJfUkVBRCIsImh0dHBzOi8vb250b2xvZ3kubmhzLnVrL2F1dGhvcmluZy9maGlyU1lORF9SRUFEIiwiQ29uc3VtZXIiLCJBdXRob3IiLCJQRVJNX3Jlc3RyaWN0ZWRfUkVBRCJdfQ.bLyGo8Y1WcO30nsYOf0SNCVG_Ym0UA5iUiiEQeIOT_fWqOSH-CIPCnFUzQyCW77dMYriboGJKNS_nMXqvpvXA-OqevsSLQaUbrOLRGRZ1Yp1pDhnLfb42f3G1xxp2LdKc033RvBUxjUtYdTV1_DUcfpRLUmQ-yk_VBEfGz1EBZMrdLPuYKxs2BjOEHKOCSSfJxnpiFWojwsF67rTZUUCBvIJy_IWhObHEHCPORmqcoHgHuuTXY_D4mNuRvwhnwOlVSAUpM7wcg1I0PLM9H7yutfIYwEfqxM5leHqNLlYbVhoGUT7Blftcdq0ye-JMjTODhkgRxhXN9QruzTybbkBDw";
+
+           // BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(token);
+          //  remoteTerminologyServiceValidationSupportOnto.addClientInterceptor(authInterceptor);
+
+            validationSupportChain.addValidationSupport(remoteTerminologyServiceValidationSupport);
         } else {
             log.debug("In memory Terminology Support");
             validationSupportChain.addValidationSupport(new InMemoryTerminologyServerValidationSupport(r4ctx));
