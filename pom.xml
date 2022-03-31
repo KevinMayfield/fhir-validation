@@ -13,7 +13,7 @@
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-      <spring-boot-version>2.2.7.RELEASE</spring-boot-version>
+      <spring-boot-version>2.5.12</spring-boot-version>
       <spring_security_version>1.0.10.RELEASE</spring_security_version>
       <hapi-fhir-version>5.3.0</hapi-fhir-version>
       <slf4j>1.7.25</slf4j>
